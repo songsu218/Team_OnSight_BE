@@ -4,6 +4,7 @@ const express = require('express');
 const userController = require('./controllers/userController');
 const searchController = require('./controllers/searchController');
 const postController = require('./controllers/postController');
+const challengeController = require('./controllers/challengeController');
 const connectDB = require('./config/db');
 
 const cors = require('cors');
@@ -18,6 +19,8 @@ app.use('/user', userController);
 // app.use('/search', searchController);
 app.use('/uploads', express.static('uploads'));
 app.use('/record', postController);
+app.use('/challenge', challengeController);
+
 
 app.get('/', function (req, res) {
   res.send('Hello World');
