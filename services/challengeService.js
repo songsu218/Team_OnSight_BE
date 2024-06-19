@@ -1,5 +1,6 @@
 const Challenge = require('../models/Challenge');
 const User = require('../models/User');
+const Record = require('../models/Record');
 const hashUtils = require('../utils/hashUtils');
 const env = require('../config/env');
 const jwt = require('jsonwebtoken');
@@ -31,61 +32,51 @@ async function challegeEnter(ChallengeData) {
   return ChallengeData;
 }
 
-//challengeNowList 챌린지 현재 전체(나의) 목록
-async function challengeNowList(ChallengeData) {
+//challengeMyList 챌린지 나의 목록
+async function challengeMyList(ChallengeData) {
   try {
     let records = null
     if(ChallengeData.member_id != null && ChallengeData.member_id != ""){
-      records = await Challenge.find({'date.1': {'$gte': ChallengeData.date},'members': ChallengeData.member_id},{challengename : 1,center :1,date:1}).sort({ _id: -1 }).limit(100).lean().exec();
-    }
-    else{
-      records = await Challenge.find({'date.1': {'$gte': ChallengeData.date}},{challengename : 1,center :1,date:1}).sort({ _id: -1 }).limit(100).lean().exec();
-    }
-/** center Collection 생성되면 주석풀고 테스트 해보자                                         
-    const centers = await Center.find();
-    records.aggregate([
-      {
-          $lookup: {
-            from: "centers"
-            , localField: "center"
-            , foreignField: "center"
-            , as: "thumnail"
-          }
+      if(ChallengeData.STATE == "TOT"){
+        //전체 챌린지 리스트
+        records = await Challenge.find({'members': ChallengeData.member_id}).limit(100).lean().exec();
       }
-      ]);
- */      
-    return records;
-  } catch (error) {
-    console.error('error', error);
-    throw error;
+      else if(ChallengeData.STATE == "NOW"){
+        //현재 챌린지 리스트
+          records = await Challenge.find({'date.1': {'$lte': strNowDate()},'members': ChallengeData.member_id}).sort({ _id: -1 }).limit(100).lean().exec();
+      }
+      else{
+        //과거 챌린지 리스트
+        records = await Challenge.find({'date.1': {'$gt': strNowDate()},'members': ChallengeData.member_id}).sort({ _id: -1 }).limit(100).lean().exec();
+      }
   }
-}
 
-//challengePastList 챌린지 현재 전체(나의) 목록
-async function challengePastList(ChallengeData) {
-  try {
-    let records = null
-    if(ChallengeData.member_id != null && ChallengeData.member_id != ""){
-      records = await Challenge.find({'date.1': {'$lt': ChallengeData.date},'members': ChallengeData.member_id},{challengename : 1,center :1,date : 1}).sort({ _id: -1 }).limit(100).lean().exec();
-    }
-    else{
-      records = await Challenge.find({'date.1': {'$lt': ChallengeData.date}},{challengename : 1,center :1,date : 1}).sort({ _id: -1 }).limit(100).lean().exec();
-    }
-/** center Collection 생성되면 주석풀고 테스트 해보자                                         
+    /* center Collection 생성되면 주석풀고 테스트 해보자                                         
     const centers = await Center.find();
     records.aggregate([
       {
           $lookup: {
-            from: "centers"
+            from: "center"
             , localField: "center"
             , foreignField: "center"
-            , as: "thumnail"
+            , as: "thumbnail"
           }
       }
       ]);
- */      
+     */
+
+    for (let index = 0; index < records.length; index++) {
+       const date = records[index].date.slice();
+       records[index].state = retState(date);
+       //Center가 언제 개발될지 모르니.. 현재는 그냥 아무거나..
+       //Center완료되면 고치자
+       records[index].thumbnail = "1718345738645.jpg";
+
+  }
+    
     //challengeLevel(recordData)
     //Center별로 1등을 찾자.
+    /*
     for (let index = 0; index < records.length; index++) {
       const center = records[index].center.slice();
       let ret = null;
@@ -101,20 +92,86 @@ async function challengePastList(ChallengeData) {
          }
         }   
     }
-
-    return records;
+    */ 
+      return records;
   } catch (error) {
     console.error('error', error);
     throw error;
   }
 }
 
-//challengeNowDetail 챌린지 현재 상세
-async function challengeNowDetail(ChallengeData) {
+//challengeTotList 챌린지 전체 목록
+async function challengeTotList(ChallengeData) {
+  try {
+    let records = null
+      if(ChallengeData.STATE == "TOT"){
+        //전체 챌린지 리스트
+        records = await Challenge.find().limit(100).lean().exec();
+      }
+      else if(ChallengeData.STATE == "NOW"){
+        //현재 챌린지 리스트
+          records = await Challenge.find({'date.1': {'$lte': strNowDate()}}).sort({ _id: -1 }).limit(100).lean().exec();
+      }
+      else{
+        //과거 챌린지 리스트
+        records = await Challenge.find({'date.1': {'$gt': strNowDate()}}).sort({ _id: -1 }).limit(100).lean().exec();
+      }
+
+
+    /* center Collection 생성되면 주석풀고 테스트 해보자                                         
+    const centers = await Center.find();
+    records.aggregate([
+      {
+          $lookup: {
+            from: "center"
+            , localField: "center"
+            , foreignField: "center"
+            , as: "thumbnail"
+          }
+      }
+      ]);
+     */
+      for (let index = 0; index < records.length; index++) {
+        const date = records[index].date.slice();
+        records[index].state = retState(date);
+        //Center가 언제 개발될지 모르니.. 현재는 그냥 아무거나..
+        //Center완료되면 고치자
+        records[index].thumbnail = "1718345738645.jpg";
+ 
+   } 
+     //challengeLevel(recordData)
+    //Center별로 1등을 찾자.
+    /*
+    for (let index = 0; index < records.length; index++) {
+      const center = records[index].center.slice();
+      let ret = null;
+      records[index].topmember = "";
+      if(center != null && center != ""){
+         ret = challengeLevel(center);
+         if(ret.length > 0){
+          const id = ret[0].id.slice();
+          const ids = await User.findOne({'id': id},{nick : 1}).lean().exec();
+          if(ids){
+            records[index].topmember = ids.nick;
+          }
+         }
+        }   
+    }
+    */
+      return records;
+  } catch (error) {
+    console.error('error', error);
+    throw error;
+  }
+}
+
+
+//challengeMemberList 챌린지 멤버 목록
+async function challengeMemberList(ChallengeData) {
   try {
     let records = await Challenge.find({'challengename': ChallengeData.challengename},{members : 1}).sort({ _id: -1 }).limit(100).lean().exec();
     const usersList = [];
-    //Center별로 1등을 찾자.
+    //User에서 id,nick,thumbnail가져온다
     for (let index = 0; index < records.length; index++) {
       const members = records[index].members.slice();
       if(members != null && members.length > 0)
@@ -137,8 +194,8 @@ async function challengeNowDetail(ChallengeData) {
   }
 }
 
-//challengePastDetail 챌린지 과거 상세
-async function challengePastDetail(ChallengeData) {
+//챌린지별 랭킹 목록 순위목록
+async function challengeRanking(ChallengeData) {
   try {
     const challenge = await Challenge.findOne({'challengename': ChallengeData.challengename},{center : 1});
     let levelList = null;
@@ -166,30 +223,57 @@ async function challengePastDetail(ChallengeData) {
   }
 }
 
+//challengeInfo 상세페이지 상단 챌린지 정보
+async function challengeInfo(ChallengeData) {
+  try {
+        const records = await Challenge.findOne({'challengename': ChallengeData.challengename}).lean().exec();
+      /* center Collection 생성되면 주석풀고 테스트 해보자                                         
+      const centers = await Center.find();
+      records.aggregate([
+        {
+            $lookup: {
+              from: "center"
+              , localField: "center"
+              , foreignField: "center"
+              , as: "thumbnail"
+            }
+        }
+        ]);
+      */ 
+      return records;
+  } catch (error) {
+    console.error('error', error);
+    throw error;
+  }
+}
 
-//challengeNowTotalList 챌린지 현재 전체 목록
+//center,id별로 levelcount 합산
 async function challengeLevel(center) {
   try {
+    let temp = null;
     let result = null;
-    let records = await records.find({'center': center}).lean().exec();
+    let records = await Record.find({'center': center}).lean().exec();
     for (let index = 0; index < records.length; index++) {
-      const element = levelCalc(records[index].level.slice());
+      const element = levelCalc(records[index].level);
+      //const element = levelCalc(records[index].level.slice());
       records[index].total = element;
     }
 
     //id별로 Group by sum
     if(records.length > 0){
-     result = records.reduce(function(res, obj) {
+      temp = records.reduce(function(res, obj) {
       if (!(obj.id in res))
           //res.push(res[obj.id] = obj);
         res.push(obj);
       else {
           res[obj.id].total += obj.total;
       }
-      return result;
-  });
+      return temp;
+     });
 
-  result.sort(arrOrderDesc("total"));
+     //result = temp.sort(arrOrderDesc("total"));
+     //result = sortByKeyDesc(temp, 'total');
+     result = records; //임시
     }
     return result;
 
@@ -199,18 +283,26 @@ async function challengeLevel(center) {
   }
 }
 
+//level+점수 합산
 function levelCalc(level){
-  let ret = 0;
   let temp = 0;
   let sum = 0;
+  for(const key in level){
+    if(level.hasOwnProperty(key)){
+      //console.log(`${key} ${level[key]}`);
+      temp = Number(key) * Number(level[key]);
+      sum = sum + temp;
+    }
+  }
+  /*
   for(let k=0;k<level.length;k++){
-    const val1 = level[k][0];
-    const val2 = level[k][1];
-    temp = val1 * val2;
+    const val1 = arLevel[k][0];
+    const val2 = arLevel[k][1];
+    temp = Number(val1) * Number(val2);
     sum = sum + temp;
   }
-  ret = sum;
-  return ret;
+  */
+  return sum;
 }
 
 //순위정렬(내림차수)
@@ -225,13 +317,61 @@ function arrOrderDesc(key) {
       return 0;    
   }    
 }
+// 특정 키를 기준으로 내림차순 정렬하는 함수
+function sortByKeyDesc(array, key) {
+  return array.sort((a, b) => {
+      if (a[key] > b[key]) return -1;
+      if (a[key] < b[key]) return 1;
+      return 0;
+  });
+}
+
+
+//현재일 가져오기(string)
+function strNowDate()
+{
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = (today.getMonth()+1).toString().padStart(2,'0');
+  const day = today.getDate().toString().padStart(2,'0');
+
+  return '${year}${month}${day}';
+}
+
+//종료일을 기준으로 상태(NOW,PAST)를 return 한다
+function retState(date){
+  let str = "NOW";
+  const enddate = date[1];
+
+  if(enddate != null && enddate.length == 8 && checkDate(enddate) == true){
+    //const sdate = new Date(Number(enddate.substring(0,4)),Number(enddate.substring(4,6))-1,Number(enddate.substring(6,8)));
+    const sdate = Date.parse(enddate);
+    const ndate = new Date();
+
+    if(sdate<ndate){
+      str = "PAST";
+    }
+  }
+  return str;
+}
+function checkDate(strDate){
+  var chkdate=Date.parse(strDate)
+  if (isNaN(chkdate)==false) {
+      var d=new Date(chkdate);
+      return true;
+  } else {
+      return false;
+  };
+
+}
 
 module.exports = {
   register,
   challegeEnter,
-  challengeNowList,
-  challengePastList,
-  challengeNowDetail,
-  challengePastDetail,
+  challengeMyList,
+  challengeTotList,
+  challengeMemberList,
+  challengeInfo,
+  challengeRanking,
   challengeLevel,
 };
