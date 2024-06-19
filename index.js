@@ -6,11 +6,7 @@ const userController = require('./controllers/userController');
 const centersRouter = require('./routes/center');
  
 const postController = require('./controllers/postController');
-<<<<<<< HEAD
 const challengeController = require('./controllers/challengeController');
-=======
- 
->>>>>>> 3c06c71cf3c2ea5152ce5e3cf7fae0f5b4cf3fb5
 const connectDB = require('./config/db');
 const cors = require('cors');
 
@@ -26,12 +22,8 @@ app.use('/api', centersRouter);
  
 app.use('/uploads', express.static('uploads'));
 app.use('/record', postController);
-<<<<<<< HEAD
 app.use('/challenge', challengeController);
 
-=======
- 
->>>>>>> 3c06c71cf3c2ea5152ce5e3cf7fae0f5b4cf3fb5
 
 app.get('/', function (req, res) {
   res.send('Hello World');
