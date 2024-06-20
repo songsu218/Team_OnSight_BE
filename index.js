@@ -19,6 +19,7 @@ connectDB();
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" })); // CORS 설정
 app.use(express.json());
+
 app.use("/user", userController);
 
 app.use("/api", centersRouter);
