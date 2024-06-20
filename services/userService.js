@@ -10,6 +10,10 @@ async function register(userData) {
     nick: userData.nick,
     thumbnail: null,
     crews: [],
+    events: [],
+    like: [],
+    recordcount: 0,
+    feedcount: 0,
   });
   return userDoc;
 }
@@ -22,8 +26,8 @@ async function login(userData) {
   const passOK = hashUtils.comparePassword(userData.password, userDoc.password);
 
   if (passOK) {
-    const token = jwt.sign({ id: userDoc._id }, env.jwtSecret, {});
-    return { id: userDoc._id, token };
+    const token = jwt.sign({ _id: userDoc._id, id: userDoc.id }, env.jwtSecret, {});
+    return { _id: userDoc._id, id: userDoc.id, token };
   } else {
     return { message: 'failed' };
   }
