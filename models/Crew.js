@@ -1,23 +1,19 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
-const crewSchema = new Schema({
-  userId: mongoose.Schema.Types.ObjectId,
-  name: { type: String, required: true },
-  si,
-  gu,
-  content,
-  crewImg,
-  members,
-  memberLimit,
-  membercount,
-  feedcount,
 
-  id: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  nick: { type: String, required: true },
-  thumbnail: { type: String, default: "" },
-  crews: { type: [String], default: [] },
+const CrewSchema = new Schema({
+  userId: { type: String, required: true },
+  name: { type: String, required: true },
+  si: { type: String, required: true },
+  gu: { type: String, required: true },
+  content: { type: String, required: true },
+  crewImg: { type: String, default: "" },
+  members: { type: [String], default: [] },
+  memberLimit: { type: Number, required: true },
+  membercount: { type: Number, default: 0 },
+  feedcount: { type: Number, default: 0 },
 });
 
-const crewModel = model("Crew", crewSchema);
-module.exports = crewModel;
+const CrewModel = model("Crew", CrewSchema);
+
+module.exports = CrewModel;
