@@ -8,7 +8,7 @@ const postController = require("./controllers/postController");
 const centersRouter = require("./routes/center");
 const userRoutes = require("./routes/user");
 const crewRoutes = require("./routes/crew");
-const authMiddleware = require("./middleware/auth");
+const authMiddleware = require("./config/auth");
 
 const connectDB = require("./config/db");
 const cors = require("cors");
