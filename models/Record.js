@@ -7,6 +7,7 @@ const RecordSchema = new Schema({
   center: { type: String, required: true },
   date: { type: Date, required: true },
   level: { type: Map, of: Number, required: true },
+  levelsum: { type: Number, required: true },
   thumbnail: { type: String },
 });
 
