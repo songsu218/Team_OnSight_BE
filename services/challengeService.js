@@ -68,10 +68,11 @@ async function challengeMyList(ChallengeData) {
     for (let index = 0; index < records.length; index++) {
        const date = records[index].date.slice();
        records[index].state = retState(date);
+       //front에서 바인딩 하기 쉽게 날짜 포멧팅
+       setDateString(records,index,date);
        //Center가 언제 개발될지 모르니.. 현재는 그냥 아무거나..
        //Center완료되면 고치자
        records[index].thumbnail = "1718345738645.jpg";
-
   }
     
     //challengeLevel(recordData)
@@ -134,6 +135,8 @@ async function challengeTotList(ChallengeData) {
       for (let index = 0; index < records.length; index++) {
         const date = records[index].date.slice();
         records[index].state = retState(date);
+        //front에서 바인딩 하기 쉽게 날짜 포멧팅
+        setDateString(records,index,date);
         //Center가 언제 개발될지 모르니.. 현재는 그냥 아무거나..
         //Center완료되면 고치자
         records[index].thumbnail = "1718345738645.jpg";
@@ -344,8 +347,8 @@ function retState(date){
   const enddate = date[1];
 
   if(enddate != null && enddate.length == 8 && checkDate(enddate) == true){
-    //const sdate = new Date(Number(enddate.substring(0,4)),Number(enddate.substring(4,6))-1,Number(enddate.substring(6,8)));
-    const sdate = Date.parse(enddate);
+    const sdate = new Date(Number(enddate.substring(0,4)),Number(enddate.substring(4,6))-1,Number(enddate.substring(6,8)));
+    //const sdate = Date.parse(enddate);
     const ndate = new Date();
 
     if(sdate<ndate){
@@ -355,7 +358,8 @@ function retState(date){
   return str;
 }
 function checkDate(strDate){
-  var chkdate=Date.parse(strDate)
+  //var chkdate=Date.parse(strDate)
+  const chkdate = new Date(Number(strDate.substring(0,4)),Number(strDate.substring(4,6))-1,Number(strDate.substring(6,8)));
   if (isNaN(chkdate)==false) {
       var d=new Date(chkdate);
       return true;
@@ -363,6 +367,30 @@ function checkDate(strDate){
       return false;
   };
 
+}
+
+function setDateString(records,index,date){
+  const sdate = date[0];
+  const edate = date[1];
+  if(sdate != null && sdate.length == 8 && checkDate(sdate) == true){
+   records[index].start_date = sdate;
+  }
+  else{
+   records[index].start_date = "";
+  }
+  if(edate != null && edate.length == 8 && checkDate(edate) == true){
+   records[index].end_date = edate;
+  }
+  else{
+   records[index].end_date = "";
+  }
+  //date_string : '2024.06.16 ~ 2024.06.23'
+  if(records[index].start_date != "" && records[index].end_date){
+   records[index].date_string = sdate.substring(0,4) + "." + sdate.substring(4,6) + "." + sdate.substring(6,8) + " ~ "+ edate.substring(0,4) + "." + edate.substring(4,6) + "." + edate.substring(6,8);
+  }
+  else{
+   records[index].date_string = "";
+  }
 }
 
 module.exports = {
