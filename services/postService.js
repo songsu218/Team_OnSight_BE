@@ -3,6 +3,7 @@ const Record = require('../models/Record');
 const saveRecord = async (recordData) => {
   try {
     const record = new Record(recordData);
+    console.log('갑자기 왜 돼', recordData);
     await record.save();
     console.log('success', record);
   } catch (error) {

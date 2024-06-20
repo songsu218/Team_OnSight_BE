@@ -28,7 +28,7 @@ router.post('/login', async (req, res) => {
     const user = await userService.login(req.body);
 
     if (user.token) {
-      res.cookie('token', user.token).json({ id: user.id });
+      res.cookie('token', user.token).json({ _id: user._id, id: user.id });
     } else {
       res.json({ message: user.message });
     }
