@@ -25,8 +25,10 @@ const upload = multer({ storage: storage });
 
 const createRecord = async (req, res) => {
   try {
-    const { title, detail, center, date, level } = req.body;
+    const { title, detail, center, date, level, levelsum } = req.body;
     const thumbnail = req.file ? req.file.filename : null;
+
+    console.log('아 짜증난다', req.body);
 
     const parsedLevel = JSON.parse(level);
 
@@ -36,6 +38,7 @@ const createRecord = async (req, res) => {
       center,
       date,
       level: new Map(Object.entries(parsedLevel)),
+      levelsum,
       thumbnail,
     };
 
