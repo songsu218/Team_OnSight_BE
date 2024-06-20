@@ -203,7 +203,7 @@ async function challengeRanking(ChallengeData) {
     const challenge = await Challenge.findOne({'challengename': ChallengeData.challengename},{center : 1});
     let levelList = null;
     if(challenge){
-     levelList = challengeLevel(challenge.center);
+     levelList = await challengeLevel(challenge.center);
       if(levelList){
         for(let i=0;i<levelList.length;i++){
           const userDoc = await User.findOne({ id: levelList[i].id });
@@ -263,21 +263,24 @@ async function challengeLevel(center) {
     }
 
     //id별로 Group by sum
-    if(records.length > 0){
-      temp = records.reduce(function(res, obj) {
-      if (!(obj.id in res))
-          //res.push(res[obj.id] = obj);
-        res.push(obj);
-      else {
-          res[obj.id].total += obj.total;
-      }
-      return temp;
-     });
+    /**  이부분 오류있어 주석하였습니다. */
+    // if(records.length > 0){
+    
+    //   temp = records.reduce(function(res, obj) {
+    //   if (!(obj.id in res))
+    //       //res.push(res[obj.id] = obj);
+    //     res.push(obj);
+    //   else {
+    //       res[obj.id].total += obj.total;
+    //   }
+    //   return temp;
+    //  });
 
-     //result = temp.sort(arrOrderDesc("total"));
-     //result = sortByKeyDesc(temp, 'total');
-     result = records; //임시
-    }
+    //  //result = temp.sort(arrOrderDesc("total"));
+    //  //result = sortByKeyDesc(temp, 'total');
+    //  result = records; //임시
+    // }
+    result = records;
     return result;
 
   } catch (error) {
