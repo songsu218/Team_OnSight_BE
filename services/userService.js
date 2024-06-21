@@ -1,7 +1,7 @@
-const User = require('../models/User');
-const hashUtils = require('../utils/hashUtils');
-const env = require('../config/env');
-const jwt = require('jsonwebtoken');
+const User = require("../models/User");
+const hashUtils = require("../utils/hashUtils");
+const env = require("../config/env");
+const jwt = require("jsonwebtoken");
 
 async function register(userData) {
   const userDoc = await User.create({
@@ -21,21 +21,40 @@ async function register(userData) {
 async function login(userData) {
   const userDoc = await User.findOne({ id: userData.id });
   if (!userDoc) {
-    return { message: 'nouser' };
+    return { message: "nouser" };
   }
   const passOK = hashUtils.comparePassword(userData.password, userDoc.password);
 
   if (passOK) {
     const token = jwt.sign(
- 
-      { _id: userDoc._id, id: userDoc.id, nick: userDoc.nick },
+      {
+        _id: userDoc._id,
+        id: userDoc.id,
+        nick: userDoc.nick,
+        thumbnail: userDoc.thumbnail,
+        crews: userDoc.crews,
+        events: userDoc.events,
+        like: userDoc.like,
+        recordcount: userDoc.recordcount,
+        feedcount: userDoc.feedcount,
+      },
       env.jwtSecret,
       {}
     );
-    return { _id: userDoc._id, id: userDoc.id, nick: userDoc.nick, token };
- 
+    return {
+      _id: userDoc._id,
+      id: userDoc.id,
+      nick: userDoc.nick,
+      thumbnail: userDoc.thumbnail,
+      crews: userDoc.crews,
+      events: userDoc.events,
+      like: userDoc.like,
+      recordcount: userDoc.recordcount,
+      feedcount: userDoc.feedcount,
+      token,
+    };
   } else {
-    return { message: 'failed' };
+    return { message: "failed" };
   }
 }
 
@@ -58,8 +77,26 @@ async function kakao(userData) {
   return { message: 'User already exists' };
 }
 
+async function profile(token) {
+  try {
+    const info = await new Promise((res, rej) => {
+      jwt.verify(token, env.jwtSecret, {}, (err, info) => {
+        if (err) return rej(err);
+        res(info);
+      });
+    });
+
+    console.log(info);
+    return info;
+  } catch (err) {
+    console.error("JWT 검증 실패 : ", err);
+    throw err;
+  }
+}
+
 module.exports = {
   register,
   login,
   kakao,
+  profile,
 };
