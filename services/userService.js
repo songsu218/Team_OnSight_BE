@@ -33,7 +33,15 @@ async function login(userData) {
   }
 }
 
+async function kakao(userData) {
+  // 1. 유저 아이디 확인
+  // 2. 없으면 유저 db 저장하고 메세지 리턴
+  // 3. 있으면 있다고 메세지 리턴
+  return null;
+}
+
 module.exports = {
   register,
   login,
+  kakao,
 };
