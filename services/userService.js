@@ -26,8 +26,12 @@ async function login(userData) {
   const passOK = hashUtils.comparePassword(userData.password, userDoc.password);
 
   if (passOK) {
-    const token = jwt.sign({ _id: userDoc._id, id: userDoc.id }, env.jwtSecret, {});
-    return { _id: userDoc._id, id: userDoc.id, token };
+    const token = jwt.sign(
+      { _id: userDoc._id, id: userDoc.id, nick: userDoc.nick },
+      env.jwtSecret,
+      {}
+    );
+    return { _id: userDoc._id, id: userDoc.id, nick: userDoc.nick, token };
   } else {
     return { message: 'failed' };
   }
