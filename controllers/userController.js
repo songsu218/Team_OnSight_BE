@@ -1,6 +1,8 @@
 const express = require('express');
 const userService = require('../services/userService');
 const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 const router = express.Router();
 
@@ -29,7 +31,6 @@ router.post('/kakao', async (res, req) => {
   }
 });
 
-
 //로그인
 router.post('/login', async (req, res) => {
   // const { id, password } = req.body;
@@ -38,13 +39,48 @@ router.post('/login', async (req, res) => {
     const user = await userService.login(req.body);
 
     if (user.token) {
-      res.cookie('onSightToken', user.token).json({ _id: user._id, id: user.id });
+      res
+        .cookie('onSightToken', user.token)
+        .json({ _id: user._id, id: user.id });
     } else {
       res.json({ message: user.message });
     }
   } catch (err) {
     res.json({ message: err.message });
   }
+});
+
+// 프로필 조회
+
+router.get('/profile', (req, res) => {
+  const { onSightToken } = req.cookies;
+
+  if (!onSightToken) {
+    return res.status(401).json('토큰 정보가 없습니다');
+  }
+
+  try {
+    jwt.verify(onSightToken, process.env.JWT_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(403).json('유효하지 않은 토큰 정보입니다');
+      }
+
+      try {
+        const user = await User.findById(decoded._id);
+        res.json(user);
+      } catch (e) {
+        res.status(500).json('서버 에러');
+      }
+    });
+  } catch (e) {
+    res.status(500).json('서버 에러');
+  }
+});
+
+//로그아웃
+
+router.post('/logout', (req, res) => {
+  res.cookie('onSightToken', '').json();
 });
 
 //일반 기록 생성, 수정, 삭제
