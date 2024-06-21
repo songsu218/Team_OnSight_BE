@@ -59,24 +59,13 @@ async function login(userData) {
 }
 
 async function kakao(userData) {
-  const userDoc = await User.findOne({ id: userData.id });
-  if (!userDoc) {
-    const newUser = await User.create({
-      id: userData.id,
-      password: await hashUtils.hashPassword(userData.password),
-      nick: userData.nick,
-      thumbnail: null,
-      crews: [],
-      events: [],
-      like: [],
-      recordcount: 0,
-      feedcount: 0,
-    });
-    return newUser;
-  }
-  return { message: 'User already exists' };
+  // 1. 유저 아이디 확인
+  // 2. 없으면 유저 db 저장하고 메세지 리턴
+  // 3. 있으면 있다고 메세지 리턴
+  return null;
 }
 
+// 0622 송성우 작성
 async function profile(token) {
   try {
     const info = await new Promise((res, rej) => {
