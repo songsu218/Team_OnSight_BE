@@ -19,6 +19,15 @@ router.post('/register', async (req, res) => {
 });
 
 //카카오 회원가입
+router.post('/kakao', async (res, req) => {
+  try {
+    // 전송 성공했을 때 보내야하는것
+    const kakaoUer = await userService.kakao(req.body);
+    res.json();
+  } catch (err) {
+    res.json({ message: err.message });
+  }
+});
 
 //로그인
 router.post('/login', async (req, res) => {
@@ -28,7 +37,7 @@ router.post('/login', async (req, res) => {
     const user = await userService.login(req.body);
 
     if (user.token) {
-      res.cookie('token', user.token).json({ _id: user._id, id: user.id });
+      res.cookie('onSightToken', user.token).json({ _id: user._id, id: user.id });
     } else {
       res.json({ message: user.message });
     }
