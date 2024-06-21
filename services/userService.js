@@ -26,7 +26,11 @@ async function login(userData) {
   const passOK = hashUtils.comparePassword(userData.password, userDoc.password);
 
   if (passOK) {
-    const token = jwt.sign({ _id: userDoc._id, id: userDoc.id }, env.jwtSecret, {});
+    const token = jwt.sign(
+      { _id: userDoc._id, id: userDoc.id },
+      env.jwtSecret,
+      {}
+    );
     return { _id: userDoc._id, id: userDoc.id, token };
   } else {
     return { message: 'failed' };
@@ -34,10 +38,22 @@ async function login(userData) {
 }
 
 async function kakao(userData) {
-  // 1. 유저 아이디 확인
-  // 2. 없으면 유저 db 저장하고 메세지 리턴
-  // 3. 있으면 있다고 메세지 리턴
-  return null;
+  const userDoc = await User.findOne({ id: userData.id });
+  if (!userDoc) {
+    const newUser = await User.create({
+      id: userData.id,
+      password: await hashUtils.hashPassword(userData.password),
+      nick: userData.nick,
+      thumbnail: null,
+      crews: [],
+      events: [],
+      like: [],
+      recordcount: 0,
+      feedcount: 0,
+    });
+    return newUser;
+  }
+  return { message: 'User already exists' };
 }
 
 module.exports = {

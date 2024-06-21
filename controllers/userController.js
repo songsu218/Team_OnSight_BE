@@ -19,26 +19,24 @@ router.post('/register', async (req, res) => {
 });
 
 //카카오 회원가입
-router.post('/kakao', async (res, req) => {
+router.post('/kakao', async (req, res) => {
   try {
-    // 전송 성공했을 때 보내야하는것
-    const kakaoUer = await userService.kakao(req.body);
-    res.json();
+    const kakaoUser = await userService.kakao(req.body);
+    res.json(kakaoUser);
   } catch (err) {
     res.json({ message: err.message });
   }
 });
 
-
 //로그인
 router.post('/login', async (req, res) => {
-  // const { id, password } = req.body;
-
   try {
     const user = await userService.login(req.body);
 
     if (user.token) {
-      res.cookie('onSightToken', user.token).json({ _id: user._id, id: user.id });
+      res
+        .cookie('onSightToken', user.token)
+        .json({ _id: user._id, id: user.id });
     } else {
       res.json({ message: user.message });
     }
@@ -46,7 +44,5 @@ router.post('/login', async (req, res) => {
     res.json({ message: err.message });
   }
 });
-
-//일반 기록 생성, 수정, 삭제
 
 module.exports = router;
