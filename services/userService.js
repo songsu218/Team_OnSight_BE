@@ -87,11 +87,24 @@ async function profile(token) {
       });
     });
 
-    console.log(info);
+    // console.log(info);
     return info;
   } catch (err) {
     console.error("JWT 검증 실패 : ", err);
     throw err;
+  }
+}
+
+async function userSelect(user) {
+  try {
+    const userDoc = await User.findOne({ id: user.id });
+    if (!userDoc) {
+      return { message: "nouser" };
+    }
+
+    return userDoc;
+  } catch (err) {
+    return { message: "mongoDB user find failed" };
   }
 }
 
@@ -100,4 +113,5 @@ module.exports = {
   login,
   kakao,
   profile,
+  userSelect,
 };

@@ -443,6 +443,20 @@ function setDateString(records, index, date) {
   }
 }
 
+// 유저의 events 배열 안의 _id와 맞는 챌린지리스트 조회 - 송성우
+async function userChallengesList(userData) {
+  try {
+    const chalList = await Challenge.find({ _id: { $in: userData } });
+    if (!chalList) {
+      return { message: "no Challenges List" };
+    }
+
+    return chalList;
+  } catch (err) {
+    return { message: "Challenges find mongoDB error" };
+  }
+}
+
 module.exports = {
   register,
   challegeEnter,
@@ -452,4 +466,5 @@ module.exports = {
   challengeInfo,
   challengeRanking,
   challengeLevel,
+  userChallengesList,
 };
