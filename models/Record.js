@@ -1,8 +1,9 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const { Schema, model } = mongoose;
 
 const RecordSchema = new Schema({
   userId: { type: String, required: true },
+  nick: { type: String, required: true },
   title: { type: String, required: true },
   content: { type: String, required: true },
   center: { type: String, required: true },
@@ -12,6 +13,6 @@ const RecordSchema = new Schema({
   date: { type: Date, required: true },
 });
 
-const Record = model("Record", RecordSchema);
+const Record = model('Record', RecordSchema);
 
 module.exports = Record;
