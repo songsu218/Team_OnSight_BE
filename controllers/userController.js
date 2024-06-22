@@ -1,5 +1,7 @@
 const express = require("express");
 const userService = require("../services/userService");
+const eventService = require("../services/challengeService");
+const postService = require("../services/postService");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -73,15 +75,68 @@ router.get("/profile", async (req, res) => {
       res.status(500).json("토큰 에러");
     }
     res.json(userInfo);
-  } catch (e) {
+  } catch (err) {
     res.status(500).json("서버 에러");
   }
 });
 
 //로그아웃
-
 router.post("/logout", (req, res) => {
   res.cookie("onSightToken", "").json();
+});
+
+//챌린지 목록 조회 - 송성우
+router.post("/challenges", async (req, res) => {
+  const { user } = req.body;
+
+  if (!user) {
+    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+  }
+
+  try {
+    const userInfo = await userService.userSelect(user);
+
+    if (!userInfo) {
+      res.status(500).json({ message });
+    }
+    const challenges = await eventService.userChallengesList(userInfo.events);
+
+    if (!challenges) {
+      res.status(500).json({ message });
+    }
+    res.json(challenges);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+//기록 목록 조회 - 송성우
+router.post("/recodes", async (req, res) => {
+  const { user } = req.body;
+
+  if (!user) {
+    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+  }
+
+  try {
+    const userInfo = await userService.userSelect(user);
+
+    if (!userInfo) {
+      res.status(500).json({ message });
+    }
+    const recodes = await postService.userRecodeList(userInfo.id);
+    console.log(recodes);
+
+    if (!recodes) {
+      res.status(500).json({ message });
+    }
+
+    res.json(recodes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
 });
 
 //일반 기록 생성, 수정, 삭제
