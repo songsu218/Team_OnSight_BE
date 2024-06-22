@@ -20,10 +20,8 @@ router.post("/register", async (req, res) => {
   }
 });
 
-
-router.post('/kakao', async (req, res) => {
+router.post("/kakao", async (req, res) => {
   try {
-     // 전송 성공했을 때 보내야하는것
     const kakaoUser = await userService.kakao(req.body);
     res.json(kakaoUser);
   } catch (err) {
@@ -87,6 +85,5 @@ router.post("/logout", (req, res) => {
 });
 
 //일반 기록 생성, 수정, 삭제
-
 
 module.exports = router;
