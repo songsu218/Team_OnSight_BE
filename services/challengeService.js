@@ -7,14 +7,19 @@ const jwt = require("jsonwebtoken");
 
 //Challenge 등록
 async function register(ChallengeData) {
+  //date "2024-01-01"
+  const sdate = new Date(ChallengeData.date);
+  let edate = new Date(ChallengeData.date);
+  edate.setDate(sdate.getDate()+7);
+  
   const ChallengeDoc = await Challenge.create({
     challengename: ChallengeData.challengename,
     id: ChallengeData.id,
     name: ChallengeData.name,
     center: ChallengeData.center,
     address: ChallengeData.address,
-    date: ChallengeData.date,
-    members: ChallengeData.members,
+    date: [sdate,edate],
+    members: [ChallengeData.id],
   });
   return ChallengeData;
 }
