@@ -23,7 +23,10 @@ async function login(userData) {
   if (!userDoc) {
     return { message: "nouser" };
   }
-  const passOK = hashUtils.comparePassword(userData.password, userDoc.password);
+  const passOK = await hashUtils.comparePassword(
+    userData.password,
+    userDoc.password
+  );
 
   if (passOK) {
     const token = jwt.sign(
@@ -108,10 +111,25 @@ async function userSelect(user) {
   }
 }
 
+async function pwCheck(user, password) {
+  try {
+    const userDoc = await User.findOne({ id: user.id });
+    if (!userDoc) {
+      return false;
+    }
+    const passOK = await hashUtils.comparePassword(password, userDoc.password);
+
+    return passOK;
+  } catch (err) {
+    throw new Error("비밀번호 확인 중 에러 발생");
+  }
+}
+
 module.exports = {
   register,
   login,
   kakao,
   profile,
   userSelect,
+  pwCheck,
 };
