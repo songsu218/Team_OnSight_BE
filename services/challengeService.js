@@ -4,6 +4,7 @@ const Record = require("../models/Record");
 const hashUtils = require("../utils/hashUtils");
 const env = require("../config/env");
 const jwt = require("jsonwebtoken");
+const climbingCenter = require("../models/climbingCenter");
 
 //Challenge 등록
 async function register(ChallengeData) {
@@ -11,15 +12,21 @@ async function register(ChallengeData) {
   const sdate = new Date(ChallengeData.date);
   let edate = new Date(ChallengeData.date);
   edate.setDate(sdate.getDate()+7);
+
+  const climbingCenters = await climbingCenter.findOne({
+    center : ChallengeData.center,
+  },
+  { thumbnail : 1}
+);
   
   const ChallengeDoc = await Challenge.create({
     challengename: ChallengeData.challengename,
     id: ChallengeData.id,
-    name: ChallengeData.name,
     center: ChallengeData.center,
     address: ChallengeData.address,
     date: [sdate,edate],
     members: [ChallengeData.id],
+    thumbnail : climbingCenters.thumbnail
   });
   return ChallengeData;
 }
@@ -238,13 +245,13 @@ async function challengeInfo(ChallengeData) {
 
 //종료일을 기준으로 상태(NOW,PAST)를 return 한다
 function retState(date) {
-  let str = "NOW";
+  let str = "true";
   const enddate = date[1];
 
   const ndate = new Date();
   //if (sdate < ndate) {
     if (enddate < ndate) {
-    str = "PAST";
+    str = "false";
   }
 
   return str;
