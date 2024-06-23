@@ -63,7 +63,7 @@
 //     detail: '내용 없음',
 //     website: 'instagram.com/onsight_samseong',
 //     thumbnail:
-//       'https://lh3.googleusercontent.com/p/AF1QipMkEGLN8bOqYiK4SYVkenKuQntQfl_btMCT0uGz=s680-w680-h510',
+//       'https://www.google.com/url?sa=i&url=https%3A%2F%2Fbooking.naver.com%2Fbooking%2F6%2Fbizes%2F934093&psig=AOvVaw1868I_YJraW2JtxfELwC0W&ust=1718972216245000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCNDSt9OU6oYDFQAAAAAdAAAAABAE',
 //     level: {
 //       1: 'red',
 //       2: 'orange',
