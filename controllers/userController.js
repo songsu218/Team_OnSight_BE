@@ -2,6 +2,7 @@ const express = require("express");
 const userService = require("../services/userService");
 const eventService = require("../services/challengeService");
 const postService = require("../services/postService");
+const crewService = require("../services/crewService");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -99,7 +100,7 @@ router.post("/challenges", async (req, res) => {
     if (!userInfo) {
       res.status(500).json({ message });
     }
-    const challenges = await eventService.userChallengesList(userInfo.events);
+    const challenges = await eventService.userChallengeList(userInfo.events);
 
     if (!challenges) {
       res.status(500).json({ message });
@@ -126,7 +127,6 @@ router.post("/recodes", async (req, res) => {
       res.status(500).json({ message });
     }
     const recodes = await postService.userRecodeList(userInfo.id);
-    console.log(recodes);
 
     if (!recodes) {
       res.status(500).json({ message });
@@ -139,6 +139,69 @@ router.post("/recodes", async (req, res) => {
   }
 });
 
-//일반 기록 생성, 수정, 삭제
+router.post("/feeds", async (req, res) => {
+  const { user } = req.body;
+  if (!user) {
+    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+  }
+
+  try {
+    const userInfo = await userService.userSelect(user);
+
+    if (!userInfo) {
+      res.status(500).json({ message });
+    }
+    const recodes = await crewService.userFeedList(userInfo.id);
+
+    if (!recodes) {
+      res.status(500).json({ message });
+    }
+
+    res.json(recodes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post("/info", async (req, res) => {
+  const { user } = req.body;
+  if (!user) {
+    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+  }
+
+  try {
+    const userInfo = await userService.userSelect(user);
+
+    if (!userInfo) {
+      res.status(500).json({ message });
+    }
+
+    res.json(userInfo);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post("/pwCheck", async (req, res) => {
+  const { user, password } = req.body;
+  if (!user) {
+    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+  }
+
+  try {
+    const pwCheck = await userService.pwCheck(user, password);
+
+    if (!pwCheck) {
+      res.status(500).json({ message });
+    }
+
+    res.json(pwCheck);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
 
 module.exports = router;
