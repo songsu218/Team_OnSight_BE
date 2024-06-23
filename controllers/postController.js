@@ -64,7 +64,19 @@ const getRecords = async (req, res) => {
   }
 };
 
+const getCenterRecords = async (req, res) => {
+  try {
+    const { center } = req.query;
+    const records = await postService.getCenterRecordsWithUser(center);
+    res.status(200).json(records);
+  } catch (error) {
+    console.error('error', error);
+    res.status(500).json({ message: 'error' });
+  }
+};
+
 router.post('/', upload.single('thumbnail'), createRecord);
 router.get('/', getRecords);
+router.get('/center', getCenterRecords);
 
 module.exports = router;
