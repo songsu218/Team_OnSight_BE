@@ -1,7 +1,7 @@
-const User = require("../models/User");
-const hashUtils = require("../utils/hashUtils");
-const env = require("../config/env");
-const jwt = require("jsonwebtoken");
+const User = require('../models/User');
+const hashUtils = require('../utils/hashUtils');
+const env = require('../config/env');
+const jwt = require('jsonwebtoken');
 
 async function register(userData) {
   const userDoc = await User.create({
@@ -21,7 +21,7 @@ async function register(userData) {
 async function login(userData) {
   const userDoc = await User.findOne({ id: userData.id });
   if (!userDoc) {
-    return { message: "nouser" };
+    return { message: 'nouser' };
   }
   const passOK = await hashUtils.comparePassword(
     userData.password,
@@ -57,7 +57,7 @@ async function login(userData) {
       token,
     };
   } else {
-    return { message: "failed" };
+    return { message: 'failed' };
   }
 }
 
@@ -77,7 +77,7 @@ async function kakao(userData) {
     });
     return newUser;
   }
-  return { message: "User already exists" };
+  return { message: 'User already exists' };
 }
 
 // 0622 송성우 작성
@@ -93,7 +93,7 @@ async function profile(token) {
     // console.log(info);
     return info;
   } catch (err) {
-    console.error("JWT 검증 실패 : ", err);
+    console.error('JWT 검증 실패 : ', err);
     throw err;
   }
 }
@@ -102,12 +102,12 @@ async function userSelect(user) {
   try {
     const userDoc = await User.findOne({ id: user.id });
     if (!userDoc) {
-      return { message: "nouser" };
+      return { message: 'nouser' };
     }
 
     return userDoc;
   } catch (err) {
-    return { message: "mongoDB user find failed" };
+    return { message: 'mongoDB user find failed' };
   }
 }
 
@@ -121,7 +121,16 @@ async function pwCheck(user, password) {
 
     return passOK;
   } catch (err) {
-    throw new Error("비밀번호 확인 중 에러 발생");
+    throw new Error('비밀번호 확인 중 에러 발생');
+  }
+}
+
+async function getAllUsers() {
+  try {
+    const users = await User.find();
+    return users;
+  } catch (err) {
+    throw new Error('error');
   }
 }
 
@@ -132,4 +141,5 @@ module.exports = {
   profile,
   userSelect,
   pwCheck,
+  getAllUsers,
 };
