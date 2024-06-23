@@ -125,6 +125,81 @@ async function pwCheck(user, password) {
   }
 }
 
+async function updateUserInfo(id, updatedInfo) {
+  try {
+    console.log(`Updating user info for userId: ${id} with data:`, updatedInfo);
+
+    const user = await User.findOneAndUpdate({ id: id }, updatedInfo, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!user) {
+      console.error(`User not found with userId: ${id}`);
+      throw new Error("사용자를 찾을 수 없습니다.");
+    }
+
+    console.log("User info updated successfully:", user);
+    return user;
+  } catch (err) {
+    console.error("Error updating user info:", err);
+    throw new Error("사용자 정보를 업데이트할 수 없습니다.");
+  }
+}
+
+async function updateUserPassword(user, currentPassword, newPassword) {
+  try {
+    const userInfo = await User.findOne({ id: user.id });
+    if (!userInfo) {
+      throw new Error("사용자를 찾을 수 없습니다.");
+    }
+
+    const passOK = await hashUtils.comparePassword(
+      currentPassword,
+      userInfo.password
+    );
+
+    if (!passOK) {
+      return false;
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { id: user.id },
+      { password: await hashUtils.hashPassword(newPassword) },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      throw new Error("비밀번호를 업데이트할 수 없습니다.");
+    }
+    return true;
+  } catch (err) {
+    console.error("Error updating password:", err);
+    throw new Error("비밀번호를 업데이트할 수 없습니다.");
+  }
+}
+
+async function deleteUser(user, password) {
+  try {
+    const userInfo = await User.findOne({ id: user.id });
+    if (!userInfo) {
+      throw new Error("사용자를 찾을 수 없습니다.");
+    }
+
+    const passOK = await hashUtils.comparePassword(password, userInfo.password);
+
+    if (!passOK) {
+      return false;
+    }
+
+    await User.deleteOne({ id: user.id });
+    return true;
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    throw new Error("사용자 정보를 삭제할 수 없습니다.");
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -132,4 +207,7 @@ module.exports = {
   profile,
   userSelect,
   pwCheck,
+  updateUserInfo,
+  updateUserPassword,
+  deleteUser,
 };
