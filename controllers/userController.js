@@ -1,11 +1,14 @@
-const express = require('express');
-const userService = require('../services/userService');
-const eventService = require('../services/challengeService');
-const postService = require('../services/postService');
-const crewService = require('../services/crewService');
-const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+
+const express = require("express");
+const userService = require("../services/userService");
+const eventService = require("../services/challengeService");
+const postService = require("../services/postService");
+const crewService = require("../services/crewService");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+const upload = require("../utils/fileUpload");
+
 
 const router = express.Router();
 
@@ -82,8 +85,10 @@ router.get('/profile', async (req, res) => {
 });
 
 //로그아웃
-router.post('/logout', (req, res) => {
-  res.cookie('onSightToken', '').json();
+router.post("/logout", (req, res) => {
+  res.clearCookie("onSightToken").json();
+  res.json({ message: "로그아웃이 성공적으로 완료되었습니다." });
+
 });
 
 //챌린지 목록 조회 - 송성우
@@ -204,8 +209,75 @@ router.post('/pwCheck', async (req, res) => {
   }
 });
 
-//전체 유저 정보 가져오기 - 류규환
+router.post("/infoUpdate", upload.single("thumbnail"), async (req, res) => {
+  const { id, nick } = req.body;
+  const thumbnail = req.file ? `/uploads/${req.file.filename}` : null;
 
+  if (!id || !nick) {
+    return res.status(400).json("필요한 정보가 제공되지 않았습니다.");
+  }
+
+  try {
+    const updatedInfo = { nick };
+    if (thumbnail) updatedInfo.thumbnail = thumbnail;
+
+    const updatedUser = await userService.updateUserInfo(id, updatedInfo);
+    res.json(updatedUser);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post("/pwUpdate", async (req, res) => {
+  const { user, currentPassword, newPassword } = req.body;
+
+  if (!user || !currentPassword || !newPassword) {
+    return res
+      .status(400)
+      .json({ message: "필수 정보가 제공되지 않았습니다." });
+  }
+
+  try {
+    const result = await userService.updateUserPassword(
+      user,
+      currentPassword,
+      newPassword
+    );
+    if (!result) {
+      return res
+        .status(400)
+        .json({ message: "현재 비밀번호가 일치하지 않습니다." });
+    }
+    res.json({ message: "비밀번호가 성공적으로 변경되었습니다." });
+  } catch (err) {
+    console.error("Error updating password:", err);
+    res.status(500).json({ message: "서버 에러가 발생했습니다." });
+  }
+});
+
+router.post("/withdrawal", async (req, res) => {
+  const { user, password } = req.body;
+
+  if (!user || !password) {
+    return res
+      .status(400)
+      .json({ message: "필수 정보가 제공되지 않았습니다." });
+  }
+
+  try {
+    const result = await userService.deleteUser(user, password);
+    if (!result) {
+      return res.status(400).json({ message: "비밀번호가 일치하지 않습니다." });
+    }
+    res.json({ message: "회원 탈퇴가 성공적으로 완료되었습니다." });
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    res.status(500).json({ message: "서버 에러가 발생했습니다." });
+  }
+});
+
+//전체 유저 정보 가져오기 - 류규환
 router.get('/userall', async (req, res) => {
   try {
     const users = await userService.getAllUsers();

@@ -27,7 +27,7 @@ const createRecord = async (req, res) => {
   try {
     const { userId, nick, title, content, center, date, level, levelsum } =
       req.body;
-    const thumbnail = req.file ? req.file.filename : null;
+    const thumbnail = req.file ? `/uploads/${req.file.filename}` : null;
 
     console.log('아 짜증난다', req.body);
 
