@@ -131,7 +131,7 @@ async function getAllUsers() {
     throw new Error('error');
   }
 }
- 
+
 // 즐겨찾기 추가 - 이주비
 async function addLike(userId, centerId) {
   try {
@@ -168,7 +168,9 @@ async function getLikes(userId) {
     return user.like;
   } catch (error) {
     throw new Error('즐겨찾기 조회 중 에러 발생');
- 
+  }
+}
+
 async function updateUserInfo(id, updatedInfo) {
   try {
     console.log(`Updating user info for userId: ${id} with data:`, updatedInfo);
@@ -241,7 +243,6 @@ async function deleteUser(user, password) {
   } catch (err) {
     console.error("Error deleting user:", err);
     throw new Error("사용자 정보를 삭제할 수 없습니다.");
- 
   }
 }
 
