@@ -80,7 +80,6 @@ async function kakao(userData) {
   return { message: 'User already exists' };
 }
 
-// 0622 송성우 작성
 async function profile(token) {
   try {
     const info = await new Promise((res, rej) => {
@@ -90,7 +89,6 @@ async function profile(token) {
       });
     });
 
-    // console.log(info);
     return info;
   } catch (err) {
     console.error('JWT 검증 실패 : ', err);
@@ -133,7 +131,44 @@ async function getAllUsers() {
     throw new Error('error');
   }
 }
+ 
+// 즐겨찾기 추가 - 이주비
+async function addLike(userId, centerId) {
+  try {
+    const user = await User.findById(userId);
+    if (!user.like.includes(centerId)) {
+      user.like.push(centerId);
+      await user.save();
+    }
+    return user.like;
+  } catch (error) {
+    throw new Error('즐겨찾기 추가 중 에러 발생');
+  }
+}
 
+// 즐찾 제거
+async function removeLike(userId, centerId) {
+  try {
+    const user = await User.findById(userId);
+    user.like = user.like.filter((id) => id.toString() !== centerId);
+    await user.save();
+    return user.like;
+  } catch (error) {
+    throw new Error('즐겨찾기 제거 중 에러 발생');
+  }
+}
+
+// 즐찾 조회
+async function getLikes(userId) {
+  try {
+    const user = await User.findById(userId).populate('like');
+    if (!user) {
+      throw new Error('사용자를 찾을 수 없습니다');
+    }
+    return user.like;
+  } catch (error) {
+    throw new Error('즐겨찾기 조회 중 에러 발생');
+ 
 async function updateUserInfo(id, updatedInfo) {
   try {
     console.log(`Updating user info for userId: ${id} with data:`, updatedInfo);
@@ -206,6 +241,7 @@ async function deleteUser(user, password) {
   } catch (err) {
     console.error("Error deleting user:", err);
     throw new Error("사용자 정보를 삭제할 수 없습니다.");
+ 
   }
 }
 
@@ -220,4 +256,7 @@ module.exports = {
   updateUserPassword,
   deleteUser,
   getAllUsers,
+  addLike,
+  removeLike,
+  getLikes,
 };

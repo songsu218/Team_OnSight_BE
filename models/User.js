@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema, model } = mongoose;
+
 const UserSchema = new Schema({
   id: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -7,7 +8,7 @@ const UserSchema = new Schema({
   thumbnail: { type: String, default: '' },
   crews: { type: [String], default: [] },
   events: { type: [String], default: [] },
-  like: { type: [String], default: [] },
+  like: [{ type: Schema.Types.ObjectId, ref: 'ClimbingCenter' }],
   recordcount: { type: Number, default: 0 },
   feedcount: { type: Number, default: 0 },
 });
