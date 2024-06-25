@@ -37,7 +37,7 @@ async function userRecodeList(userData) {
   }
 }
 
-// 암장상세->기록에 보여지는 닉네임, 기록수, 프사 - 이주비
+// 암장상세 - 이주비
 const getCenterRecords = async (center) => {
   try {
     const records = await Record.find({ center });
@@ -51,19 +51,25 @@ const getCenterRecords = async (center) => {
 // 유저 정보를 포함한 기록 조회
 const getCenterRecordsWithUser = async (center) => {
   try {
-    const records = await Record.find({ center }).populate({
-      path: 'userId',
-      select: 'thumbnail nick recordcount',
-      options: { lean: true },
-    });
-    // 기본값 0으로 설정
-    records.forEach((record) => {
-      if (!record.userId.recordcount) {
-        record.userId.recordcount = 0;
-      }
-    });
-
-    return records;
+    const records = await Record.find({ center });
+    const recordsWithUserDetails = await Promise.all(
+      records.map(async (record) => {
+        const user = await User.findOne({ id: record.userId });
+        if (user) {
+          return {
+            ...record.toObject(),
+            userThumbnail: user.thumbnail,
+            userRecordCount: user.recordcount,
+          };
+        }
+        return {
+          ...record.toObject(),
+          userThumbnail: null,
+          userRecordCount: 0,
+        };
+      })
+    );
+    return recordsWithUserDetails;
   } catch (error) {
     console.error('error', error);
     throw error;
