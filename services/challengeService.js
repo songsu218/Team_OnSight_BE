@@ -16,14 +16,14 @@ async function register(ChallengeData) {
   const climbingCenters = await climbingCenter.findOne({
     center : ChallengeData.center,
   },
-  { thumbnail : 1}
+  { thumbnail : 1,address : 1}
 );
   
   const ChallengeDoc = await Challenge.create({
     challengename: ChallengeData.challengename,
     id: ChallengeData.id,
     center: ChallengeData.center,
-    address: ChallengeData.address,
+    address: climbingCenters.address,
     date: [sdate,edate],
     members: [ChallengeData.id],
     thumbnail : climbingCenters.thumbnail
@@ -54,6 +54,7 @@ async function challengeMyList(ChallengeData) {
       if (ChallengeData.STATE == "TOT") {
         //전체 챌린지 리스트
         records = await Challenge.find({ members: ChallengeData.member_id })
+          .sort({ _id: -1 })
           .lean()
           .exec();
       } else if (ChallengeData.STATE == "NOW") {
@@ -105,7 +106,7 @@ async function challengeTotList(ChallengeData) {
     let records = null;
     if (ChallengeData.STATE == "TOT") {
       //전체 챌린지 리스트
-      records = await Challenge.find().lean().exec();
+      records = await Challenge.find().sort({ _id: -1 }).lean().exec();
     } else if (ChallengeData.STATE == "NOW") {
       //현재 챌린지 리스트
       records = await Challenge.find({ "date.1": { $gte: new Date() } })
@@ -206,6 +207,7 @@ async function challengeRanking(ChallengeData) {
       if (levelList) {
         for (let i = 0; i < levelList.length; i++) {
           const userDoc = await User.findOne({ id: levelList[i]._id });
+          levelList[i].rank = i + 1;
           if (userDoc) {
             levelList[i].nick = userDoc.nick;
             levelList[i].thumbnail = userDoc.thumbnail;
