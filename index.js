@@ -7,6 +7,7 @@ const userController = require('./controllers/userController');
 const postController = require('./controllers/postController');
 const challengeController = require('./controllers/challengeController');
 const crewController = require('./controllers/crewController');
+const crewFeedController = require('./controllers/crewFeedController');
 
 const centersRouter = require('./routes/center');
 
@@ -31,6 +32,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/record', postController);
 app.use('/challenge', challengeController);
 app.use('/crew', crewController);
+app.use('/feed', crewFeedController);
 
 app.get('/', function (req, res) {
   res.send('Hello World');
