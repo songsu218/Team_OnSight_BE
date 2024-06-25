@@ -289,4 +289,60 @@ router.get('/userall', async (req, res) => {
   }
 });
 
+// 즐겨찾기 추가 - 이주비
+router.post('/like', async (req, res) => {
+  const { centerId } = req.body;
+  const { onSightToken } = req.cookies;
+
+  if (!onSightToken) {
+    return res.status(401).json('토큰 정보가 없습니다');
+  }
+
+  try {
+    const decodedToken = jwt.verify(onSightToken, env.jwtSecret);
+    const userId = decodedToken._id;
+    const likes = await userService.addLike(userId, centerId);
+    res.status(200).json({ likes });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 즐겨찾기 제거
+router.post('/unlike', async (req, res) => {
+  const { centerId } = req.body;
+  const { onSightToken } = req.cookies;
+
+  if (!onSightToken) {
+    return res.status(401).json('토큰 정보가 없습니다');
+  }
+
+  try {
+    const decodedToken = jwt.verify(onSightToken, env.jwtSecret);
+    const userId = decodedToken._id;
+    const likes = await userService.removeLike(userId, centerId);
+    res.status(200).json({ likes });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// 유저 즐겨찾기 조회
+router.get('/likes', async (req, res) => {
+  const { onSightToken } = req.cookies;
+
+  if (!onSightToken) {
+    return res.status(401).json('토큰 정보가 없습니다');
+  }
+
+  try {
+    const decodedToken = jwt.verify(onSightToken, env.jwtSecret);
+    const userId = decodedToken._id;
+    const likes = await userService.getLikes(userId);
+    res.status(200).json({ likes });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
