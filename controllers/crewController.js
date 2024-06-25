@@ -1,11 +1,11 @@
-const express = require('express');
-const multer = require('multer');
-const crewService = require('../services/crewService');
-const path = require('path');
+const express = require("express");
+const multer = require("multer");
+const crewService = require("../services/crewService");
+const path = require("path");
 
 const router = express.Router();
 
-const UPLOADS_DIR = path.join(__dirname, '../uploads');
+const UPLOADS_DIR = path.join(__dirname, "../uploads");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -23,8 +23,8 @@ const getCrews = async (req, res) => {
     const crews = await crewService.getAllCrews();
     res.status(200).json(crews);
   } catch (error) {
-    console.error('error', error);
-    res.status(500).json({ message: 'error' });
+    console.error("error", error);
+    res.status(500).json({ message: "error" });
   }
 };
 
@@ -41,14 +41,16 @@ const createCrew = async (req, res) => {
       si,
       gu,
       crewImg,
+      members: [userId],
+      membercount: 1,
     };
 
-    await crewService.createCrew(crewData);
+    const crew = await crewService.createCrew(crewData);
 
-    res.status(200).json({ message: 'success', crewImg });
+    res.status(200).json({ message: "success", crew });
   } catch (error) {
-    console.error('error', error);
-    res.status(500).json({ message: 'error' });
+    console.error("error", error);
+    res.status(500).json({ message: "error" });
   }
 };
 
@@ -64,13 +66,13 @@ const updateCrew = async (req, res) => {
 
     res.status(200).json(updatedCrew);
   } catch (error) {
-    console.error('error', error);
-    res.status(500).json({ message: 'error' });
+    console.error("error", error);
+    res.status(500).json({ message: "error" });
   }
 };
 
-router.get('/', getCrews);
-router.post('/', upload.single('crewImg'), createCrew);
-router.put('/:id', upload.single('crewImg'), updateCrew);
+router.get("/", getCrews);
+router.post("/", upload.single("crewImg"), createCrew);
+router.put("/:id", upload.single("crewImg"), updateCrew);
 
 module.exports = router;
