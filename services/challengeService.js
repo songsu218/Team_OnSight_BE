@@ -11,24 +11,25 @@ async function register(ChallengeData) {
   //date "2024-01-01"
   const sdate = new Date(ChallengeData.date);
   let edate = new Date(ChallengeData.date);
-  edate.setDate(sdate.getDate()+7);
+  edate.setDate(sdate.getDate() + 7);
 
-  const climbingCenters = await climbingCenter.findOne({
-    center : ChallengeData.center,
-  },
-  { thumbnail : 1,address : 1}
-);
-  
+  const climbingCenters = await climbingCenter.findOne(
+    {
+      center: ChallengeData.center,
+    },
+    { thumbnail: 1, address: 1 }
+  );
+
   const ChallengeDoc = await Challenge.create({
     challengename: ChallengeData.challengename,
     id: ChallengeData.id,
     center: ChallengeData.center,
     address: climbingCenters.address,
-    date: [sdate,edate],
+    date: [sdate, edate],
     members: [ChallengeData.id],
-    thumbnail : climbingCenters.thumbnail
+    thumbnail: climbingCenters.thumbnail,
   });
-  return ChallengeData;
+  return ChallengeDoc;
 }
 
 //challenge 참가등록
@@ -39,11 +40,11 @@ async function challegeEnter(ChallengeData) {
   if (!ChallengeDoc) {
     return { message: "nochallenge" };
   }
-  const ChallengeDoc2 = await ChallengeDoc.updateOne({
+  const updateChallengeDoc = await ChallengeDoc.updateOne({
     $addToSet: { members: ChallengeData.members },
   });
 
-  return ChallengeData;
+  return { ChallengeDoc, updateChallengeDoc };
 }
 
 //challengeMyList 챌린지 나의 목록
@@ -90,7 +91,8 @@ async function challengeMyList(ChallengeData) {
       //front에서 바인딩 하기 쉽게 날짜 포멧팅
       records[index].start_date = sdate.toISOString().split("T")[0];
       records[index].end_date = edate.toISOString().split("T")[0];
-      records[index].date_string = records[index].start_date + " ~ " + records[index].end_date;      
+      records[index].date_string =
+        records[index].start_date + " ~ " + records[index].end_date;
     }
     return records;
   } catch (error) {
@@ -132,7 +134,8 @@ async function challengeTotList(ChallengeData) {
       //front에서 바인딩 하기 쉽게 날짜 포멧팅
       records[index].start_date = sdate.toISOString().split("T")[0];
       records[index].end_date = edate.toISOString().split("T")[0];
-      records[index].date_string = records[index].start_date + " ~ " + records[index].end_date;
+      records[index].date_string =
+        records[index].start_date + " ~ " + records[index].end_date;
     }
     return records;
   } catch (error) {
@@ -156,7 +159,7 @@ async function challengeMemberList(ChallengeData) {
     if (!records) {
       return { message: "no Challenges List" };
     }
-  
+
     const usersList = [];
     //User에서 id,nick,thumbnail가져온다
     for (let index = 0; index < records.length; index++) {
@@ -195,14 +198,14 @@ async function challengeRanking(ChallengeData) {
     let levelList = null;
     if (challenge) {
       levelList = await Record.aggregate([
-        {$match : { center : challenge.center }},
-        {$group : {_id : "$userId", total : {$sum : "$levelsum"}}},
-        {$sort : {"total" : -1}}
-      ])
+        { $match: { center: challenge.center } },
+        { $group: { _id: "$userId", total: { $sum: "$levelsum" } } },
+        { $sort: { total: -1 } },
+      ]);
 
       if (!levelList) {
         return { message: "no Record List" };
-      }   
+      }
 
       if (levelList) {
         for (let i = 0; i < levelList.length; i++) {
@@ -236,7 +239,7 @@ async function challengeInfo(ChallengeData) {
       .exec();
     if (!records) {
       return { message: "no Challenges List" };
-    }    
+    }
     return records;
   } catch (error) {
     //console.error("error", error);
@@ -252,7 +255,7 @@ function retState(date) {
 
   const ndate = new Date();
   //if (sdate < ndate) {
-    if (enddate < ndate) {
+  if (enddate < ndate) {
     str = "false";
   }
 

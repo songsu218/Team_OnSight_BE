@@ -7,7 +7,7 @@ const UserSchema = new Schema({
   nick: { type: String, required: true },
   thumbnail: { type: String, default: "" },
   crews: [{ type: Schema.Types.ObjectId, ref: "Crew", default: [] }],
-  events: { type: [String], default: [] },
+  events: [{ type: Schema.Types.ObjectId, ref: "Challenge", default: [] }],
   like: [{ type: Schema.Types.ObjectId, ref: "ClimbingCenter" }],
   recordcount: { type: Number, default: 0 },
   feedcount: { type: Number, default: 0 },

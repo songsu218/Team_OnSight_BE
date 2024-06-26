@@ -262,6 +262,40 @@ async function crewsJoin(userInfo, crewInfo) {
   }
 }
 
+async function challCreate(ChallengeData) {
+  try {
+    const user = await User.findOneAndUpdate(
+      { id: ChallengeData.id },
+      { $addToSet: { events: ChallengeData._id } },
+      { new: true, runValidators: true }
+    );
+    if (!user) {
+      throw new Error("첼린지생성 : 사용자를 업데이트 할 수 없습니다.");
+    }
+    return user;
+  } catch (error) {
+    throw new Error("사용자 정보를 업데이트 할 수 없습니다.");
+  }
+}
+
+async function challJoin(ChallengeData, ChallengeUpData) {
+  console.log("이거이거", ChallengeData.members);
+  console.log("이거이거2", ChallengeUpData);
+  try {
+    const user = await User.findOneAndUpdate(
+      { id: ChallengeData.members },
+      { $addToSet: { events: ChallengeUpData._id } },
+      { new: true, runValidators: true }
+    );
+    if (!user) {
+      throw new Error("첼린지생성 : 사용자를 업데이트 할 수 없습니다.");
+    }
+    return user;
+  } catch (error) {
+    throw new Error("사용자 정보를 업데이트 할 수 없습니다.");
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -277,4 +311,6 @@ module.exports = {
   removeLike,
   getLikes,
   crewsJoin,
+  challCreate,
+  challJoin,
 };
