@@ -1,10 +1,10 @@
-const Feed = require("../models/Feed");
+const CrewFeed = require("../models/CrewFeed");
 const Crew = require("../models/Crew");
 const User = require("../models/User");
 
 async function userFeedList(userData) {
   try {
-    const feedList = await Feed.find({ userId: { $in: userData } });
+    const feedList = await CrewFeed.find({ userId: { $in: userData } });
     if (!feedList) {
       return { message: "no feeds List" };
     }
