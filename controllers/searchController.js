@@ -1,15 +1,24 @@
-//암장 즐겨찾기 추가
-// 시 구 DB 가져오기
-//암장 리스트 검색
+const searchService = require('../services/searchService');
 
-//암장 리스트 가져오기
-const ClimbingCenter = require('../models/climbingCenter');
-
-exports.getCenters = async (req, res) => {
+const getCenters = async (req, res) => {
   try {
-    const centers = await ClimbingCenter.find();
+    const centers = await searchService.getCenters();
     res.json(centers);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+};
+
+const getDistrictCoordinates = async (req, res) => {
+  try {
+    const coordinates = await searchService.getDistrictCoordinates();
+    res.json(coordinates);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = {
+  getCenters,
+  getDistrictCoordinates,
 };
