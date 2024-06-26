@@ -72,9 +72,27 @@ const updateCrew = async (id, crewData) => {
   }
 };
 
+// 파송송이 추가
+async function joincrew(userInfo, crewInfo) {
+  try {
+    const crew = await Crew.findOneAndUpdate(
+      { _id: crewInfo._id },
+      { $addToSet: { members: userInfo.id } },
+      { new: true, runValidators: true }
+    );
+    if (!crew) {
+      throw new Error("크루가입 : 크루 정보를 업데이트 할 수 없습니다.");
+    }
+    return crew;
+  } catch (err) {
+    throw new Error("크루 정보를 업데이트 할 수 없습니다.");
+  }
+}
+
 module.exports = {
   userFeedList,
   createCrew,
   getAllCrews,
   updateCrew,
+  joincrew,
 };

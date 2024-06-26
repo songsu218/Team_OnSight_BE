@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 
 const CrewSchema = new Schema({
@@ -14,6 +14,6 @@ const CrewSchema = new Schema({
   feedcount: { type: Number, default: 0 },
 });
 
-const CrewModel = model('Crew', CrewSchema);
+const CrewModel = model("Crew", CrewSchema);
 
 module.exports = CrewModel;

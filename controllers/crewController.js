@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const crewService = require("../services/crewService");
+const userService = require("../services/userService");
 const path = require("path");
 
 const router = express.Router();
@@ -71,8 +72,22 @@ const updateCrew = async (req, res) => {
   }
 };
 
+// 파송송 작업
+const joincrew = async (req, res) => {
+  const { userId, crewId } = req.body;
+  try {
+    const updateCrew = await crewService.joincrew(userId, crewId);
+    const updateUser = await userService.crewsJoin(userId, crewId);
+
+    res.json({ updateUser, updateCrew });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 router.get("/", getCrews);
 router.post("/", upload.single("crewImg"), createCrew);
 router.put("/:id", upload.single("crewImg"), updateCrew);
+router.post("/crewjoin", joincrew);
 
 module.exports = router;
