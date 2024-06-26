@@ -1,3 +1,4 @@
+// userService.js
 const User = require('../models/User');
 const ClimbingCenter = require('../models/climbingCenter');
 const Record = require('../models/Record');
@@ -61,6 +62,23 @@ async function login(userData) {
   } else {
     return { message: 'failed' };
   }
+}
+
+async function toggleLike(userId, centerId) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('사용자를 찾을 수 없습니다.');
+  }
+
+  const index = user.like.indexOf(centerId);
+  if (index === -1) {
+    user.like.push(centerId);
+  } else {
+    user.like.splice(index, 1);
+  }
+
+  await user.save();
+  return user;
 }
 
 async function kakao(userData) {
@@ -228,6 +246,7 @@ async function crewsJoin(userInfo, crewInfo) {
 module.exports = {
   register,
   login,
+  toggleLike,
   kakao,
   profile,
   userSelect,

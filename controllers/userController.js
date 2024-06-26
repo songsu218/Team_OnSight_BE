@@ -1,3 +1,4 @@
+// userController.js
 const express = require('express');
 const userService = require('../services/userService');
 const eventService = require('../services/challengeService');
@@ -86,6 +87,19 @@ router.get('/profile', async (req, res) => {
 router.post('/logout', (req, res) => {
   res.clearCookie('onSightToken').json();
   res.json({ message: '로그아웃이 성공적으로 완료되었습니다.' });
+});
+
+// 즐겨찾기 토글
+router.post('/toggle-like', async (req, res) => {
+  const { userId, centerId } = req.body;
+
+  try {
+    const updatedUser = await userService.toggleLike(userId, centerId);
+    res.json(updatedUser.like);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
 });
 
 //챌린지 목록 조회 - 송성우
