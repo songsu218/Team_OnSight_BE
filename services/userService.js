@@ -1,5 +1,8 @@
+
+// userService.js
 const User = require('../models/User');
 const ClimbingCenter = require('../models/climbingCenter');
+const Record = require('../models/Record');
 const hashUtils = require('../utils/hashUtils');
 const env = require('../config/env');
 const jwt = require('jsonwebtoken');
@@ -57,6 +60,24 @@ async function login(userData) {
   } else {
     return { message: 'failed' };
   }
+}
+
+// 
+async function toggleLike(userId, centerId) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('사용자를 찾을 수 없습니다.');
+  }
+
+  const index = user.like.indexOf(centerId);
+  if (index === -1) {
+    user.like.push(centerId);
+  } else {
+    user.like.splice(index, 1);
+  }
+
+  await user.save();
+  return user;
 }
 
 async function kakao(userData) {
@@ -127,45 +148,6 @@ async function getAllUsers() {
     return users;
   } catch (err) {
     throw new Error('error');
-  }
-}
-
-// 즐겨찾기 추가 - 이주비
-async function addLike(userId, centerId) {
-  try {
-    const user = await User.findById(userId);
-    if (!user.like.includes(centerId)) {
-      user.like.push(centerId);
-      await user.save();
-    }
-    return user.like;
-  } catch (error) {
-    throw new Error('즐겨찾기 추가 중 에러 발생');
-  }
-}
-
-// 즐찾 제거
-async function removeLike(userId, centerId) {
-  try {
-    const user = await User.findById(userId);
-    user.like = user.like.filter((id) => id.toString() !== centerId);
-    await user.save();
-    return user.like;
-  } catch (error) {
-    throw new Error('즐겨찾기 제거 중 에러 발생');
-  }
-}
-
-// 즐찾 조회
-async function getLikes(userId) {
-  try {
-    const user = await User.findById(userId).populate('like');
-    if (!user) {
-      throw new Error('사용자를 찾을 수 없습니다');
-    }
-    return user.like;
-  } catch (error) {
-    throw new Error('즐겨찾기 조회 중 에러 발생');
   }
 }
 
@@ -305,6 +287,7 @@ async function centersSelect(user) {
 module.exports = {
   register,
   login,
+  toggleLike,
   kakao,
   profile,
   userSelect,
@@ -313,9 +296,6 @@ module.exports = {
   updateUserPassword,
   deleteUser,
   getAllUsers,
-  addLike,
-  removeLike,
-  getLikes,
   crewsJoin,
   challCreate,
   challJoin,
