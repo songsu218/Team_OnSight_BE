@@ -1,10 +1,10 @@
-const Challenge = require("../models/Challenge");
-const User = require("../models/User");
-const Record = require("../models/Record");
-const hashUtils = require("../utils/hashUtils");
-const env = require("../config/env");
-const jwt = require("jsonwebtoken");
-const climbingCenter = require("../models/climbingCenter");
+const Challenge = require('../models/Challenge');
+const User = require('../models/User');
+const Record = require('../models/Record');
+const hashUtils = require('../utils/hashUtils');
+const env = require('../config/env');
+const jwt = require('jsonwebtoken');
+const climbingCenter = require('../models/climbingCenter');
 
 //Challenge 등록
 async function register(ChallengeData) {
@@ -38,7 +38,10 @@ async function challegeEnter(ChallengeData) {
     challengename: ChallengeData.challengename,
   });
   if (!ChallengeDoc) {
-    return { message: "nochallenge" };
+    return { message: 'nochallenge' };
+  }
+  if (ChallengeDoc.members.includes(ChallengeData.members)) {
+    return { message: 'already_joined' };
   }
   const updateChallengeDoc = await ChallengeDoc.updateOne({
     $addToSet: { members: ChallengeData.members },
@@ -51,17 +54,17 @@ async function challegeEnter(ChallengeData) {
 async function challengeMyList(ChallengeData) {
   try {
     let records = null;
-    if (ChallengeData.member_id != null && ChallengeData.member_id != "") {
-      if (ChallengeData.STATE == "TOT") {
+    if (ChallengeData.member_id != null && ChallengeData.member_id != '') {
+      if (ChallengeData.STATE == 'TOT') {
         //전체 챌린지 리스트
         records = await Challenge.find({ members: ChallengeData.member_id })
           .sort({ _id: -1 })
           .lean()
           .exec();
-      } else if (ChallengeData.STATE == "NOW") {
+      } else if (ChallengeData.STATE == 'NOW') {
         //현재 챌린지 리스트
         records = await Challenge.find({
-          "date.1": { $gte: new Date() },
+          'date.1': { $gte: new Date() },
           members: ChallengeData.member_id,
         })
           .sort({ _id: -1 })
@@ -70,7 +73,7 @@ async function challengeMyList(ChallengeData) {
       } else {
         //과거 챌린지 리스트
         records = await Challenge.find({
-          "date.1": { $lt: new Date() },
+          'date.1': { $lt: new Date() },
           members: ChallengeData.member_id,
         })
           .sort({ _id: -1 })
@@ -80,7 +83,7 @@ async function challengeMyList(ChallengeData) {
     }
 
     if (!records) {
-      return { message: "no Challenges List" };
+      return { message: 'no Challenges List' };
     }
 
     for (let index = 0; index < records.length; index++) {
@@ -89,16 +92,16 @@ async function challengeMyList(ChallengeData) {
       const edate = date[1];
       records[index].state = retState(date);
       //front에서 바인딩 하기 쉽게 날짜 포멧팅
-      records[index].start_date = sdate.toISOString().split("T")[0];
-      records[index].end_date = edate.toISOString().split("T")[0];
+      records[index].start_date = sdate.toISOString().split('T')[0];
+      records[index].end_date = edate.toISOString().split('T')[0];
       records[index].date_string =
-        records[index].start_date + " ~ " + records[index].end_date;
+        records[index].start_date + ' ~ ' + records[index].end_date;
     }
     return records;
   } catch (error) {
     //console.error("error", error);
     //throw error;
-    return { message: "Challenges find mongoDB error" };
+    return { message: 'Challenges find mongoDB error' };
   }
 }
 
@@ -106,25 +109,25 @@ async function challengeMyList(ChallengeData) {
 async function challengeTotList(ChallengeData) {
   try {
     let records = null;
-    if (ChallengeData.STATE == "TOT") {
+    if (ChallengeData.STATE == 'TOT') {
       //전체 챌린지 리스트
       records = await Challenge.find().sort({ _id: -1 }).lean().exec();
-    } else if (ChallengeData.STATE == "NOW") {
+    } else if (ChallengeData.STATE == 'NOW') {
       //현재 챌린지 리스트
-      records = await Challenge.find({ "date.1": { $gte: new Date() } })
+      records = await Challenge.find({ 'date.1': { $gte: new Date() } })
         .sort({ _id: -1 })
         .lean()
         .exec();
     } else {
       //과거 챌린지 리스트
-      records = await Challenge.find({ "date.1": { $lt: new Date() } })
+      records = await Challenge.find({ 'date.1': { $lt: new Date() } })
         .sort({ _id: -1 })
         .lean()
         .exec();
     }
 
     if (!records) {
-      return { message: "no Challenges List" };
+      return { message: 'no Challenges List' };
     }
     for (let index = 0; index < records.length; index++) {
       const date = records[index].date.slice();
@@ -132,16 +135,16 @@ async function challengeTotList(ChallengeData) {
       const edate = date[1];
       records[index].state = retState(date);
       //front에서 바인딩 하기 쉽게 날짜 포멧팅
-      records[index].start_date = sdate.toISOString().split("T")[0];
-      records[index].end_date = edate.toISOString().split("T")[0];
+      records[index].start_date = sdate.toISOString().split('T')[0];
+      records[index].end_date = edate.toISOString().split('T')[0];
       records[index].date_string =
-        records[index].start_date + " ~ " + records[index].end_date;
+        records[index].start_date + ' ~ ' + records[index].end_date;
     }
     return records;
   } catch (error) {
     //console.error("error", error);
     //throw error;
-    return { message: "Challenges find mongoDB error" };
+    return { message: 'Challenges find mongoDB error' };
   }
 }
 
@@ -157,7 +160,7 @@ async function challengeMemberList(ChallengeData) {
       .exec();
 
     if (!records) {
-      return { message: "no Challenges List" };
+      return { message: 'no Challenges List' };
     }
 
     const usersList = [];
@@ -184,7 +187,7 @@ async function challengeMemberList(ChallengeData) {
   } catch (error) {
     //console.error("error", error);
     //throw error;
-    return { message: "challengeUser find mongoDB error" };
+    return { message: 'challengeUser find mongoDB error' };
   }
 }
 
@@ -199,12 +202,12 @@ async function challengeRanking(ChallengeData) {
     if (challenge) {
       levelList = await Record.aggregate([
         { $match: { center: challenge.center } },
-        { $group: { _id: "$userId", total: { $sum: "$levelsum" } } },
+        { $group: { _id: '$userId', total: { $sum: '$levelsum' } } },
         { $sort: { total: -1 } },
       ]);
 
       if (!levelList) {
-        return { message: "no Record List" };
+        return { message: 'no Record List' };
       }
 
       if (levelList) {
@@ -215,7 +218,7 @@ async function challengeRanking(ChallengeData) {
             levelList[i].nick = userDoc.nick;
             levelList[i].thumbnail = userDoc.thumbnail;
           } else {
-            levelList[i].nick = "";
+            levelList[i].nick = '';
             levelList[i].thumbnail = null;
           }
         }
@@ -225,7 +228,7 @@ async function challengeRanking(ChallengeData) {
   } catch (error) {
     //console.error("error", error);
     //throw error;
-    return { message: "challengeRanking find mongoDB error" };
+    return { message: 'challengeRanking find mongoDB error' };
   }
 }
 
@@ -238,25 +241,25 @@ async function challengeInfo(ChallengeData) {
       .lean()
       .exec();
     if (!records) {
-      return { message: "no Challenges List" };
+      return { message: 'no Challenges List' };
     }
     return records;
   } catch (error) {
     //console.error("error", error);
     //throw error;
-    return { message: "Challenges find mongoDB error" };
+    return { message: 'Challenges find mongoDB error' };
   }
 }
 
 //종료일을 기준으로 상태(NOW,PAST)를 return 한다
 function retState(date) {
-  let str = "true";
+  let str = 'true';
   const enddate = date[1];
 
   const ndate = new Date();
   //if (sdate < ndate) {
   if (enddate < ndate) {
-    str = "false";
+    str = 'false';
   }
 
   return str;
@@ -267,12 +270,12 @@ async function userChallengeList(userData) {
   try {
     const chalList = await Challenge.find({ _id: { $in: userData } });
     if (!chalList) {
-      return { message: "no Challenges List" };
+      return { message: 'no Challenges List' };
     }
 
     return chalList;
   } catch (err) {
-    return { message: "Challenges find mongoDB error" };
+    return { message: 'Challenges find mongoDB error' };
   }
 }
 
