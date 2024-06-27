@@ -1,7 +1,8 @@
-const User = require("../models/User");
-const hashUtils = require("../utils/hashUtils");
-const env = require("../config/env");
-const jwt = require("jsonwebtoken");
+const User = require('../models/User');
+const ClimbingCenter = require('../models/climbingCenter');
+const hashUtils = require('../utils/hashUtils');
+const env = require('../config/env');
+const jwt = require('jsonwebtoken');
 
 async function register(userData) {
   const userDoc = await User.create({
@@ -21,12 +22,9 @@ async function register(userData) {
 async function login(userData) {
   const userDoc = await User.findOne({ id: userData.id });
   if (!userDoc) {
-    return { message: "nouser" };
+    return { message: 'nouser' };
   }
-  const passOK = await hashUtils.comparePassword(
-    userData.password,
-    userDoc.password
-  );
+  const passOK = await hashUtils.comparePassword(userData.password, userDoc.password);
 
   if (passOK) {
     const token = jwt.sign(
@@ -57,7 +55,7 @@ async function login(userData) {
       token,
     };
   } else {
-    return { message: "failed" };
+    return { message: 'failed' };
   }
 }
 
@@ -77,7 +75,7 @@ async function kakao(userData) {
     });
     return newUser;
   }
-  return { message: "User already exists" };
+  return { message: 'User already exists' };
 }
 
 async function profile(token) {
@@ -91,7 +89,7 @@ async function profile(token) {
 
     return info;
   } catch (err) {
-    console.error("JWT 검증 실패 : ", err);
+    console.error('JWT 검증 실패 : ', err);
     throw err;
   }
 }
@@ -100,12 +98,12 @@ async function userSelect(user) {
   try {
     const userDoc = await User.findOne({ id: user.id });
     if (!userDoc) {
-      return { message: "nouser" };
+      return { message: 'nouser' };
     }
 
     return userDoc;
   } catch (err) {
-    return { message: "mongoDB user find failed" };
+    return { message: 'mongoDB user find failed' };
   }
 }
 
@@ -119,7 +117,7 @@ async function pwCheck(user, password) {
 
     return passOK;
   } catch (err) {
-    throw new Error("비밀번호 확인 중 에러 발생");
+    throw new Error('비밀번호 확인 중 에러 발생');
   }
 }
 
@@ -128,7 +126,7 @@ async function getAllUsers() {
     const users = await User.find();
     return users;
   } catch (err) {
-    throw new Error("error");
+    throw new Error('error');
   }
 }
 
@@ -142,7 +140,7 @@ async function addLike(userId, centerId) {
     }
     return user.like;
   } catch (error) {
-    throw new Error("즐겨찾기 추가 중 에러 발생");
+    throw new Error('즐겨찾기 추가 중 에러 발생');
   }
 }
 
@@ -154,20 +152,20 @@ async function removeLike(userId, centerId) {
     await user.save();
     return user.like;
   } catch (error) {
-    throw new Error("즐겨찾기 제거 중 에러 발생");
+    throw new Error('즐겨찾기 제거 중 에러 발생');
   }
 }
 
 // 즐찾 조회
 async function getLikes(userId) {
   try {
-    const user = await User.findById(userId).populate("like");
+    const user = await User.findById(userId).populate('like');
     if (!user) {
-      throw new Error("사용자를 찾을 수 없습니다");
+      throw new Error('사용자를 찾을 수 없습니다');
     }
     return user.like;
   } catch (error) {
-    throw new Error("즐겨찾기 조회 중 에러 발생");
+    throw new Error('즐겨찾기 조회 중 에러 발생');
   }
 }
 
@@ -182,14 +180,14 @@ async function updateUserInfo(id, updatedInfo) {
 
     if (!user) {
       console.error(`User not found with userId: ${id}`);
-      throw new Error("사용자를 찾을 수 없습니다.");
+      throw new Error('사용자를 찾을 수 없습니다.');
     }
 
-    console.log("User info updated successfully:", user);
+    console.log('User info updated successfully:', user);
     return user;
   } catch (err) {
-    console.error("Error updating user info:", err);
-    throw new Error("사용자 정보를 업데이트할 수 없습니다.");
+    console.error('Error updating user info:', err);
+    throw new Error('사용자 정보를 업데이트할 수 없습니다.');
   }
 }
 
@@ -197,13 +195,10 @@ async function updateUserPassword(user, currentPassword, newPassword) {
   try {
     const userInfo = await User.findOne({ id: user.id });
     if (!userInfo) {
-      throw new Error("사용자를 찾을 수 없습니다.");
+      throw new Error('사용자를 찾을 수 없습니다.');
     }
 
-    const passOK = await hashUtils.comparePassword(
-      currentPassword,
-      userInfo.password
-    );
+    const passOK = await hashUtils.comparePassword(currentPassword, userInfo.password);
 
     if (!passOK) {
       return false;
@@ -216,12 +211,12 @@ async function updateUserPassword(user, currentPassword, newPassword) {
     );
 
     if (!updatedUser) {
-      throw new Error("비밀번호를 업데이트할 수 없습니다.");
+      throw new Error('비밀번호를 업데이트할 수 없습니다.');
     }
     return true;
   } catch (err) {
-    console.error("Error updating password:", err);
-    throw new Error("비밀번호를 업데이트할 수 없습니다.");
+    console.error('Error updating password:', err);
+    throw new Error('비밀번호를 업데이트할 수 없습니다.');
   }
 }
 
@@ -229,7 +224,7 @@ async function deleteUser(user, password) {
   try {
     const userInfo = await User.findOne({ id: user.id });
     if (!userInfo) {
-      throw new Error("사용자를 찾을 수 없습니다.");
+      throw new Error('사용자를 찾을 수 없습니다.');
     }
 
     const passOK = await hashUtils.comparePassword(password, userInfo.password);
@@ -241,8 +236,8 @@ async function deleteUser(user, password) {
     await User.deleteOne({ id: user.id });
     return true;
   } catch (err) {
-    console.error("Error deleting user:", err);
-    throw new Error("사용자 정보를 삭제할 수 없습니다.");
+    console.error('Error deleting user:', err);
+    throw new Error('사용자 정보를 삭제할 수 없습니다.');
   }
 }
 
@@ -254,11 +249,11 @@ async function crewsJoin(userInfo, crewInfo) {
       { new: true, runValidators: true }
     );
     if (!user) {
-      throw new Error("크루가입 : 사용자를 업데이트 할 수 없습니다.");
+      throw new Error('크루가입 : 사용자를 업데이트 할 수 없습니다.');
     }
     return user;
   } catch (error) {
-    throw new Error("사용자 정보를 업데이트 할 수 없습니다.");
+    throw new Error('사용자 정보를 업데이트 할 수 없습니다.');
   }
 }
 
@@ -270,17 +265,15 @@ async function challCreate(ChallengeData) {
       { new: true, runValidators: true }
     );
     if (!user) {
-      throw new Error("첼린지생성 : 사용자를 업데이트 할 수 없습니다.");
+      throw new Error('첼린지생성 : 사용자를 업데이트 할 수 없습니다.');
     }
     return user;
   } catch (error) {
-    throw new Error("사용자 정보를 업데이트 할 수 없습니다.");
+    throw new Error('사용자 정보를 업데이트 할 수 없습니다.');
   }
 }
 
 async function challJoin(ChallengeData, ChallengeUpData) {
-  console.log("이거이거", ChallengeData.members);
-  console.log("이거이거2", ChallengeUpData);
   try {
     const user = await User.findOneAndUpdate(
       { id: ChallengeData.members },
@@ -288,11 +281,24 @@ async function challJoin(ChallengeData, ChallengeUpData) {
       { new: true, runValidators: true }
     );
     if (!user) {
-      throw new Error("첼린지생성 : 사용자를 업데이트 할 수 없습니다.");
+      throw new Error('첼린지생성 : 사용자를 업데이트 할 수 없습니다.');
     }
     return user;
   } catch (error) {
-    throw new Error("사용자 정보를 업데이트 할 수 없습니다.");
+    throw new Error('사용자 정보를 업데이트 할 수 없습니다.');
+  }
+}
+
+async function centersSelect(user) {
+  try {
+    const centerList = await ClimbingCenter.find({ _id: { $in: user.like } });
+    if (!centerList) {
+      return { message: 'no Challenges List' };
+    }
+
+    return centerList;
+  } catch (err) {
+    return { message: 'Challenges find mongoDB error' };
   }
 }
 
@@ -313,4 +319,5 @@ module.exports = {
   crewsJoin,
   challCreate,
   challJoin,
+  centersSelect,
 };
