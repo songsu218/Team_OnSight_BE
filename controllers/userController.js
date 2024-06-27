@@ -1,4 +1,4 @@
-// userController.js
+
 const express = require('express');
 const userService = require('../services/userService');
 const eventService = require('../services/challengeService');
@@ -42,19 +42,17 @@ router.post('/login', async (req, res) => {
 
     if (user.token) {
       console.log(user.token);
-      res
-        .cookie('onSightToken', user.token, { sameSite: 'none', secure: true })
-        .json({
-          _id: user._id,
-          id: user.id,
-          nick: user.nick,
-          thumbnail: user.thumbnail,
-          crews: user.crews,
-          events: user.events,
-          like: user.like,
-          recordcount: user.recordcount,
-          feedcount: user.feedcount,
-        });
+      res.cookie('onSightToken', user.token, { sameSite: 'none', secure: true }).json({
+        _id: user._id,
+        id: user.id,
+        nick: user.nick,
+        thumbnail: user.thumbnail,
+        crews: user.crews,
+        events: user.events,
+        like: user.like,
+        recordcount: user.recordcount,
+        feedcount: user.feedcount,
+      });
     } else {
       res.json({ message: user.message });
     }
@@ -244,21 +242,13 @@ router.post('/pwUpdate', async (req, res) => {
   const { user, currentPassword, newPassword } = req.body;
 
   if (!user || !currentPassword || !newPassword) {
-    return res
-      .status(400)
-      .json({ message: '필수 정보가 제공되지 않았습니다.' });
+    return res.status(400).json({ message: '필수 정보가 제공되지 않았습니다.' });
   }
 
   try {
-    const result = await userService.updateUserPassword(
-      user,
-      currentPassword,
-      newPassword
-    );
+    const result = await userService.updateUserPassword(user, currentPassword, newPassword);
     if (!result) {
-      return res
-        .status(400)
-        .json({ message: '현재 비밀번호가 일치하지 않습니다.' });
+      return res.status(400).json({ message: '현재 비밀번호가 일치하지 않습니다.' });
     }
     res.json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
   } catch (err) {
@@ -271,9 +261,7 @@ router.post('/withdrawal', async (req, res) => {
   const { user, password } = req.body;
 
   if (!user || !password) {
-    return res
-      .status(400)
-      .json({ message: '필수 정보가 제공되지 않았습니다.' });
+    return res.status(400).json({ message: '필수 정보가 제공되지 않았습니다.' });
   }
 
   try {
@@ -297,6 +285,26 @@ router.get('/userall', async (req, res) => {
     res.json(users);
   } catch (err) {
     res.status(500).json({});
+  }
+});
+
+router.post('/centerlist', async (req, res) => {
+  const { user } = req.body;
+  if (!user) {
+    return res.status(400).json('사용자 ID가 제공되지 않았습니다.');
+  }
+
+  try {
+    const centerInfo = await userService.centersSelect(user);
+
+    if (!centerInfo) {
+      res.status(500).json({ message });
+    }
+
+    res.json(centerInfo);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
   }
 });
 

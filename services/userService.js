@@ -1,3 +1,4 @@
+
 // userService.js
 const User = require('../models/User');
 const ClimbingCenter = require('../models/climbingCenter');
@@ -26,10 +27,7 @@ async function login(userData) {
   if (!userDoc) {
     return { message: 'nouser' };
   }
-  const passOK = await hashUtils.comparePassword(
-    userData.password,
-    userDoc.password
-  );
+  const passOK = await hashUtils.comparePassword(userData.password, userDoc.password);
 
   if (passOK) {
     const token = jwt.sign(
@@ -182,10 +180,7 @@ async function updateUserPassword(user, currentPassword, newPassword) {
       throw new Error('사용자를 찾을 수 없습니다.');
     }
 
-    const passOK = await hashUtils.comparePassword(
-      currentPassword,
-      userInfo.password
-    );
+    const passOK = await hashUtils.comparePassword(currentPassword, userInfo.password);
 
     if (!passOK) {
       return false;
@@ -252,17 +247,15 @@ async function challCreate(ChallengeData) {
       { new: true, runValidators: true }
     );
     if (!user) {
-      throw new Error("첼린지생성 : 사용자를 업데이트 할 수 없습니다.");
+      throw new Error('첼린지생성 : 사용자를 업데이트 할 수 없습니다.');
     }
     return user;
   } catch (error) {
-    throw new Error("사용자 정보를 업데이트 할 수 없습니다.");
+    throw new Error('사용자 정보를 업데이트 할 수 없습니다.');
   }
 }
 
 async function challJoin(ChallengeData, ChallengeUpData) {
-  console.log("이거이거", ChallengeData.members);
-  console.log("이거이거2", ChallengeUpData);
   try {
     const user = await User.findOneAndUpdate(
       { id: ChallengeData.members },
@@ -270,11 +263,24 @@ async function challJoin(ChallengeData, ChallengeUpData) {
       { new: true, runValidators: true }
     );
     if (!user) {
-      throw new Error("첼린지생성 : 사용자를 업데이트 할 수 없습니다.");
+      throw new Error('첼린지생성 : 사용자를 업데이트 할 수 없습니다.');
     }
     return user;
   } catch (error) {
-    throw new Error("사용자 정보를 업데이트 할 수 없습니다.");
+    throw new Error('사용자 정보를 업데이트 할 수 없습니다.');
+  }
+}
+
+async function centersSelect(user) {
+  try {
+    const centerList = await ClimbingCenter.find({ _id: { $in: user.like } });
+    if (!centerList) {
+      return { message: 'no Challenges List' };
+    }
+
+    return centerList;
+  } catch (err) {
+    return { message: 'Challenges find mongoDB error' };
   }
 }
 
@@ -293,4 +299,5 @@ module.exports = {
   crewsJoin,
   challCreate,
   challJoin,
+  centersSelect,
 };
