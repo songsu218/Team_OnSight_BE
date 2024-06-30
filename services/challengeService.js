@@ -4,7 +4,7 @@ const Record = require('../models/Record');
 const hashUtils = require('../utils/hashUtils');
 const env = require('../config/env');
 const jwt = require('jsonwebtoken');
-const climbingCenter = require('../models/climbingCenter');
+const climbingCenter = require('../models/Center');
 
 //Challenge 등록
 async function register(ChallengeData) {

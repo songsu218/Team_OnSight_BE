@@ -1,4 +1,4 @@
-const ClimbingCenter = require('../models/climbingCenter');
+const ClimbingCenter = require('../models/Center');
 const DistrictCoordinates = require('../models/DistrictCoordinates');
 
 const getCenters = async () => {

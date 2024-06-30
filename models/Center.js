@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const { Schema, model } = mongoose;
 
-const climbingCenterSchema = new mongoose.Schema({
+const CenterSchema = new Schema({
   center: { type: String, required: true },
   si: { type: String, required: true },
   gu: { type: String, required: true },
@@ -20,8 +21,5 @@ const climbingCenterSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model(
-  'ClimbingCenter',
-  climbingCenterSchema,
-  'center'
-);
+const CenterModel = model('Center', CenterSchema, 'center');
+module.exports = CenterModel;
