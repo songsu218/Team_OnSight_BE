@@ -12,6 +12,7 @@ async function register(ChallengeData) {
   const sdate = new Date(ChallengeData.date);
   let edate = new Date(ChallengeData.date);
   edate.setDate(sdate.getDate() + 7);
+  edate.setHours(23, 59, 59, 999); // 종료일을 그날 밤 23:59:59로 설정
 
   const climbingCenters = await climbingCenter.findOne(
     {
