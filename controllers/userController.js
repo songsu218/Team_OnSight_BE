@@ -3,25 +3,20 @@ const userService = require("../services/userService");
 const eventService = require("../services/challengeService");
 const postService = require("../services/postService");
 const crewService = require("../services/crewService");
-const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
 const upload = require("../utils/fileUpload");
 
 const router = express.Router();
 
-router.use(cookieParser());
-
 //일반 회원가입 요청
 router.post("/register", async (req, res) => {
-  // const { id, nick, password } = req.body;
+  const { id, nick, password } = req.body;
 
-  try {
-    const newUser = await userService.register(req.body);
-    res.json(newUser);
-  } catch (err) {
-    res.json({ message: err.message });
+  if (!id || !nick || !password) {
+    return res.status(400).json({ message: "모든 필드를 입력해 주세요." });
   }
+
+  const result = await userService.register(id, nick, password);
+  return res.status(result.status).json({ message: result.message });
 });
 
 router.post("/kakao", async (req, res) => {
@@ -41,19 +36,7 @@ router.post("/login", async (req, res) => {
 
     if (user.token) {
       console.log(user.token);
-      res
-        .cookie("onSightToken", user.token, { sameSite: "none", secure: true })
-        .json({
-          _id: user._id,
-          id: user.id,
-          nick: user.nick,
-          thumbnail: user.thumbnail,
-          crews: user.crews,
-          events: user.events,
-          like: user.like,
-          recordcount: user.recordcount,
-          feedcount: user.feedcount,
-        });
+      res.json({ token: user.token });
     } else {
       res.json({ message: user.message });
     }
@@ -63,28 +46,28 @@ router.post("/login", async (req, res) => {
 });
 
 // 프로필 조회 0622 송성우 수정
-router.get("/profile", async (req, res) => {
-  const { onSightToken } = req.cookies;
+router.post("/profile", async (req, res) => {
+  const token =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
 
-  if (!onSightToken) {
-    return res.status(401).json("토큰 정보가 없습니다");
+  if (!token) {
+    return res.status(401).json("토큰이 필요합니다.");
   }
 
   try {
-    const userInfo = await userService.profile(onSightToken);
+    const userInfo = await userService.profile(token);
     if (!userInfo) {
-      console.log("여기 에러", userInfo);
-      res.status(500).json("토큰 에러");
+      return res.status(500).json("토큰 에러");
     }
     res.json(userInfo);
   } catch (err) {
-    res.status(500).json("서버 에러");
+    console.error("JWT 검증 실패 : ", err);
+    return res.status(401).json("유효하지 않은 토큰입니다.");
   }
 });
 
 //로그아웃
 router.post("/logout", (req, res) => {
-  res.clearCookie("onSightToken").json();
   res.json({ message: "로그아웃이 성공적으로 완료되었습니다." });
 });
 
@@ -200,91 +183,61 @@ router.post("/info", async (req, res) => {
 });
 
 router.post("/pwCheck", async (req, res) => {
-  const { user, password } = req.body;
-  if (!user) {
-    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+  const { id, password } = req.body;
+
+  if (!id || !password) {
+    return res
+      .status(400)
+      .json({ message: "아이디와 비밀번호를 입력해 주세요." });
   }
 
-  try {
-    const pwCheck = await userService.pwCheck(user, password);
-
-    if (!pwCheck) {
-      res.status(500).json({ message });
-    }
-
-    res.json(pwCheck);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
-  }
+  const result = await userService.checkPassword(id, password);
+  return res.status(result.status).json({ message: result.message });
 });
 
 router.post("/infoUpdate", upload.single("thumbnail"), async (req, res) => {
   const { id, nick } = req.body;
   const thumbnail = req.file ? `/uploads/${req.file.filename}` : null;
 
-  if (!id || !nick) {
-    return res.status(400).json("필요한 정보가 제공되지 않았습니다.");
-  }
+  const updatedInfo = { nick };
+  if (thumbnail) updatedInfo.thumbnail = thumbnail;
 
-  try {
-    const updatedInfo = { nick };
-    if (thumbnail) updatedInfo.thumbnail = thumbnail;
-
-    const updatedUser = await userService.updateUserInfo(id, updatedInfo);
-    res.json(updatedUser);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
+  const result = await userService.updateUserInfo(id, updatedInfo);
+  if (result.status === 200) {
+    res.status(200).json(result.user);
+  } else {
+    res.status(result.status).json({ message: result.message });
   }
 });
 
 router.post("/pwUpdate", async (req, res) => {
-  const { user, currentPassword, newPassword } = req.body;
+  const { id, currentPassword, newPassword } = req.body;
 
-  if (!user || !currentPassword || !newPassword) {
+  if (!id || !currentPassword || !newPassword) {
     return res
       .status(400)
       .json({ message: "필수 정보가 제공되지 않았습니다." });
   }
 
-  try {
-    const result = await userService.updateUserPassword(
-      user,
-      currentPassword,
-      newPassword
-    );
-    if (!result) {
-      return res
-        .status(400)
-        .json({ message: "현재 비밀번호가 일치하지 않습니다." });
-    }
-    res.json({ message: "비밀번호가 성공적으로 변경되었습니다." });
-  } catch (err) {
-    console.error("Error updating password:", err);
-    res.status(500).json({ message: "서버 에러가 발생했습니다." });
-  }
+  const result = await userService.updateUserPassword(
+    user,
+    currentPassword,
+    newPassword
+  );
+  return res.status(result.status).json({ message: result.message });
 });
 
 router.post("/withdrawal", async (req, res) => {
-  const { user, password } = req.body;
+  const { id, password } = req.body;
 
-  if (!user || !password) {
+  if (!id || !password) {
     return res
       .status(400)
       .json({ message: "필수 정보가 제공되지 않았습니다." });
   }
 
-  try {
-    const result = await userService.deleteUser(user, password);
-    if (!result) {
-      return res.status(400).json({ message: "비밀번호가 일치하지 않습니다." });
-    }
-    res.json({ message: "회원 탈퇴가 성공적으로 완료되었습니다." });
-  } catch (err) {
-    console.error("Error deleting user:", err);
-    res.status(500).json({ message: "서버 에러가 발생했습니다." });
-  }
+  const result = await userService.deleteUser(id, password);
+  return res.status(result.status).json({ message: result.message });
 });
 
 //전체 유저 정보 가져오기 - 류규환
