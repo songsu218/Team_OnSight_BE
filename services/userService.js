@@ -1,6 +1,5 @@
 const User = require("../models/User");
 const ClimbingCenter = require("../models/Center");
-const Record = require("../models/Record");
 const { hashPassword, comparePassword } = require("../utils/hashUtils");
 const env = require("../config/env");
 const jwt = require("jsonwebtoken");

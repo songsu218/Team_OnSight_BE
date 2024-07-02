@@ -24,34 +24,42 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const createRecord = async (req, res) => {
-  try {
-    const { userId, nick, title, content, center, date, level, levelsum } =
-      req.body;
-    const thumbnail = req.file ? `/uploads/${req.file.filename}` : null;
+  const { userId, nick, title, content, center, date, level, levelsum } =
+    req.body;
+  const thumbnail = req.file ? `/uploads/${req.file.filename}` : null;
 
-    console.log("아 짜증난다", req.body);
-
-    const parsedLevel = JSON.parse(level);
-
-    const recordData = {
-      userId,
-      nick,
-      title,
-      content,
-      center,
-      date,
-      level: new Map(Object.entries(parsedLevel)),
-      levelsum,
-      thumbnail,
-    };
-
-    await postService.saveRecord(recordData);
-
-    res.status(200).json({ message: "success", thumbnail });
-  } catch (error) {
-    console.error("error", error);
-    res.status(500).json({ message: "error" });
+  if (
+    !userId ||
+    !title ||
+    !content ||
+    !center ||
+    !date ||
+    !level ||
+    !levelsum
+  ) {
+    return res.status(400).json({ message: "모든 값를 입력해 주세요." });
   }
+
+  const parsedLevel = JSON.parse(level);
+
+  const recordData = {
+    userId,
+    nick,
+    title,
+    content,
+    center,
+    date,
+    level: new Map(Object.entries(parsedLevel)),
+    levelsum,
+    thumbnail,
+  };
+
+  const result = await postService.saveRecord(recordData);
+
+  res.status(200).json({ message: "success", thumbnail });
+  return res
+    .status(result.status)
+    .json({ message: result.message, record: result.record });
 };
 
 const getRecords = async (req, res) => {
