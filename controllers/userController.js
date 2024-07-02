@@ -272,4 +272,26 @@ router.post("/centerlist", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  const userId = req.params.id;
+
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ message: "사용자 ID가 제공되지 않았습니다." });
+  }
+
+  try {
+    const result = await userService.getUserById(userId);
+    return res
+      .status(result.status)
+      .json(result.status === 200 ? result.user : { message: result.message });
+  } catch (error) {
+    console.error("사용자 정보를 가져오는 중 오류 발생:", error);
+    res
+      .status(500)
+      .json({ message: "서버 오류가 발생했습니다. 다시 시도해 주세요." });
+  }
+});
+
 module.exports = router;

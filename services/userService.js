@@ -298,6 +298,23 @@ async function centersSelect(user) {
   }
 }
 
+// 특정 사용자 정보 조회 함수
+async function getUserById(userId) {
+  try {
+    const user = await User.findOne({ id: userId }).select("-password"); // 비밀번호 제외하고 사용자 정보 가져오기
+    if (!user) {
+      return { status: 404, message: "사용자를 찾을 수 없습니다." };
+    }
+    return { status: 200, user };
+  } catch (err) {
+    console.error("사용자 정보를 가져오는 중 오류 발생:", err);
+    return {
+      status: 500,
+      message: "서버 오류가 발생했습니다. 다시 시도해 주세요.",
+    };
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -314,4 +331,5 @@ module.exports = {
   challCreate,
   challJoin,
   centersSelect,
+  getUserById,
 };
