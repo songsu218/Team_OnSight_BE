@@ -3,13 +3,34 @@ const User = require("../models/User");
 
 const saveRecord = async (recordData) => {
   try {
-    const record = new Record(recordData);
-    console.log("갑자기 왜 돼", recordData);
-    await record.save();
-    console.log("success", record);
+    const record = await Record.create(recordData);
+    console.log("Record saved:", record);
+
+    const user = await User.findOneAndUpdate(
+      { id: recordData.userId },
+      { $inc: { recordcount: 1 } },
+      { new: true }
+    );
+
+    if (!user) {
+      console.error(`User not found with userId: ${recordData.userId}`);
+      return { status: 404, message: "사용자를 찾을 수 없습니다." };
+    }
+
+    return {
+      status: 200,
+      message: "기록이 성공적으로 저장되었습니다.",
+      record,
+    };
   } catch (error) {
-    console.error("error", error);
-    throw error;
+    console.error("기록 저장 중 오류 발생:", error);
+    if (error.name === "ValidationError") {
+      return { status: 400, message: error.message };
+    }
+    return {
+      status: 500,
+      message: "서버 오류가 발생했습니다. 다시 시도해 주세요.",
+    };
   }
 };
 

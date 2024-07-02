@@ -9,10 +9,15 @@ const createCrewFeed = async (req, res) => {
   try {
     const { title, content, userId, crewId, crewName } = req.body;
     const feedData = { crewName, title, content, userId, crewId };
-    const newFeed = await crewFeedService.createCrewFeed(feedData);
-    res.status(201).json(newFeed);
+    const result = await crewFeedService.createCrewFeed(feedData);
+    return res
+      .status(result.status)
+      .json({ message: result.message, feed: result.newFeed });
   } catch (error) {
-    res.status(500).json({ message: "error", error });
+    console.error("서버 오류 발생:", error);
+    return res
+      .status(500)
+      .json({ message: "서버 오류가 발생했습니다. 다시 시도해 주세요." });
   }
 };
 
@@ -49,20 +54,15 @@ const updateCrewFeed = async (req, res) => {
 const deleteCrewFeed = async (req, res) => {
   try {
     const { id } = req.params;
-    const feed = await crewFeedService.getCrewFeed(id);
-    if (feed.message) {
-      res.status(404).json(feed);
-      return;
-    }
+    const { userId } = req.query;
 
-    const deletedFeed = await crewFeedService.deleteCrewFeed(id);
-    if (deletedFeed.message) {
-      res.status(404).json(deletedFeed);
-    } else {
-      res.status(200).json({ message: "success", crewId: feed.crewId });
-    }
+    const result = await crewFeedService.deleteCrewFeed(id);
+    return res.status(result.status).json({ message: result.message });
   } catch (error) {
-    res.status(500).json({ message: "error", error });
+    console.error("서버 오류 발생:", error);
+    return res
+      .status(500)
+      .json({ message: "서버 오류가 발생했습니다. 다시 시도해 주세요." });
   }
 };
 
