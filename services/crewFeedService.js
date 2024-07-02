@@ -60,9 +60,12 @@ const updateCrewFeed = async (id, feedData) => {
   }
 };
 
-const deleteCrewFeed = async (id) => {
+const deleteCrewFeed = async (feedId, userId) => {
   try {
-    const deletedFeed = await CrewFeed.findByIdAndDelete(id);
+    const deletedFeed = await CrewFeed.findByIdAndDelete({
+      _id: feedId,
+      userId: userId,
+    });
     if (!deletedFeed) {
       return { status: 404, message: "삭제된 피드입니다." };
     }

@@ -56,7 +56,7 @@ const deleteCrewFeed = async (req, res) => {
     const { id } = req.params;
     const { userId } = req.query;
 
-    const result = await crewFeedService.deleteCrewFeed(id);
+    const result = await crewFeedService.deleteCrewFeed(id, userId);
     return res.status(result.status).json({ message: result.message });
   } catch (error) {
     console.error("서버 오류 발생:", error);
