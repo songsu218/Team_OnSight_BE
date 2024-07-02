@@ -77,7 +77,7 @@ async function joincrew(userInfo, crewInfo) {
   try {
     const crew = await Crew.findOneAndUpdate(
       { _id: crewInfo._id },
-      { $addToSet: { members: userInfo.id } },
+      { $addToSet: { members: userInfo.id }, $inc: { membercount: 1 } },
       { new: true, runValidators: true }
     );
     if (!crew) {

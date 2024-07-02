@@ -78,8 +78,10 @@ const joincrew = async (req, res) => {
   try {
     const updateCrew = await crewService.joincrew(userId, crewId);
     const updateUser = await userService.crewsJoin(userId, crewId);
-
-    res.json({ updateUser, updateCrew });
+    const users = await userService.getAllUsers();
+    const crews = await crewService.getAllCrews();
+    console.log(users);
+    res.json({ updateUser, updateCrew, users, crews });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
