@@ -1,35 +1,37 @@
-const express = require("express");
-const userService = require("../services/userService");
-const eventService = require("../services/challengeService");
-const postService = require("../services/postService");
-const crewService = require("../services/crewService");
-const upload = require("../utils/fileUpload");
+const express = require('express');
+const userService = require('../services/userService');
+const eventService = require('../services/challengeService');
+const postService = require('../services/postService');
+const crewService = require('../services/crewService');
+const upload = require('../utils/fileUpload');
 
 const router = express.Router();
 
 //일반 회원가입 요청
-router.post("/register", async (req, res) => {
+router.post('/register', async (req, res) => {
   const { id, nick, password } = req.body;
 
   if (!id || !nick || !password) {
-    return res.status(400).json({ message: "모든 필드를 입력해 주세요." });
+    return res.status(400).json({ message: '모든 필드를 입력해 주세요.' });
   }
 
   const result = await userService.register(id, nick, password);
   return res.status(result.status).json({ message: result.message });
 });
 
-router.post("/kakao", async (req, res) => {
+router.post('/kakao', async (req, res) => {
+  const { kakaoInfo } = req.body;
+  console.log('컨트롤부분카카오인포:', kakaoInfo);
   try {
-    const kakaoUser = await userService.kakao(req.body);
-    res.json(kakaoUser);
+    const kakaoUser = await userService.kakao(kakaoInfo);
+    res.json({ token: kakaoUser.token });
   } catch (err) {
     res.json({ message: err.message });
   }
 });
 
 //로그인
-router.post("/login", async (req, res) => {
+router.post('/login', async (req, res) => {
   // const { id, password } = req.body;
   try {
     const user = await userService.login(req.body);
@@ -46,33 +48,32 @@ router.post("/login", async (req, res) => {
 });
 
 // 프로필 조회 0622 송성우 수정
-router.post("/profile", async (req, res) => {
-  const token =
-    req.headers.authorization && req.headers.authorization.split(" ")[1];
+router.post('/profile', async (req, res) => {
+  const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json("토큰이 필요합니다.");
+    return res.status(401).json('토큰이 필요합니다.');
   }
 
   try {
     const userInfo = await userService.profile(token);
     if (!userInfo) {
-      return res.status(500).json("토큰 에러");
+      return res.status(500).json('토큰 에러');
     }
     res.json(userInfo);
   } catch (err) {
-    console.error("JWT 검증 실패 : ", err);
-    return res.status(401).json("유효하지 않은 토큰입니다.");
+    console.error('JWT 검증 실패 : ', err);
+    return res.status(401).json('유효하지 않은 토큰입니다.');
   }
 });
 
 //로그아웃
-router.post("/logout", (req, res) => {
-  res.json({ message: "로그아웃이 성공적으로 완료되었습니다." });
+router.post('/logout', (req, res) => {
+  res.json({ message: '로그아웃이 성공적으로 완료되었습니다.' });
 });
 
 // 즐겨찾기 토글
-router.post("/toggleLike", async (req, res) => {
+router.post('/toggleLike', async (req, res) => {
   const { userId, centerId } = req.body;
 
   try {
@@ -85,11 +86,11 @@ router.post("/toggleLike", async (req, res) => {
 });
 
 //챌린지 목록 조회 - 송성우
-router.post("/challenges", async (req, res) => {
+router.post('/challenges', async (req, res) => {
   const { user } = req.body;
 
   if (!user) {
-    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+    return res.status(400).json('사용자 ID가 제공되지 않았습니다.');
   }
 
   try {
@@ -111,11 +112,11 @@ router.post("/challenges", async (req, res) => {
 });
 
 //기록 목록 조회 - 송성우
-router.post("/recodes", async (req, res) => {
+router.post('/recodes', async (req, res) => {
   const { user } = req.body;
 
   if (!user) {
-    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+    return res.status(400).json('사용자 ID가 제공되지 않았습니다.');
   }
 
   try {
@@ -137,10 +138,10 @@ router.post("/recodes", async (req, res) => {
   }
 });
 
-router.post("/feeds", async (req, res) => {
+router.post('/feeds', async (req, res) => {
   const { user } = req.body;
   if (!user) {
-    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+    return res.status(400).json('사용자 ID가 제공되지 않았습니다.');
   }
 
   try {
@@ -162,10 +163,10 @@ router.post("/feeds", async (req, res) => {
   }
 });
 
-router.post("/info", async (req, res) => {
+router.post('/info', async (req, res) => {
   const { user } = req.body;
   if (!user) {
-    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+    return res.status(400).json('사용자 ID가 제공되지 않았습니다.');
   }
 
   try {
@@ -182,20 +183,18 @@ router.post("/info", async (req, res) => {
   }
 });
 
-router.post("/pwCheck", async (req, res) => {
+router.post('/pwCheck', async (req, res) => {
   const { id, password } = req.body;
 
   if (!id || !password) {
-    return res
-      .status(400)
-      .json({ message: "아이디와 비밀번호를 입력해 주세요." });
+    return res.status(400).json({ message: '아이디와 비밀번호를 입력해 주세요.' });
   }
 
   const result = await userService.checkPassword(id, password);
   return res.status(result.status).json({ message: result.message });
 });
 
-router.post("/infoUpdate", upload.single("thumbnail"), async (req, res) => {
+router.post('/infoUpdate', upload.single('thumbnail'), async (req, res) => {
   const { id, nick } = req.body;
   const thumbnail = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -210,30 +209,22 @@ router.post("/infoUpdate", upload.single("thumbnail"), async (req, res) => {
   }
 });
 
-router.post("/pwUpdate", async (req, res) => {
+router.post('/pwUpdate', async (req, res) => {
   const { id, currentPassword, newPassword } = req.body;
 
   if (!id || !currentPassword || !newPassword) {
-    return res
-      .status(400)
-      .json({ message: "필수 정보가 제공되지 않았습니다." });
+    return res.status(400).json({ message: '필수 정보가 제공되지 않았습니다.' });
   }
 
-  const result = await userService.updateUserPassword(
-    id,
-    currentPassword,
-    newPassword
-  );
+  const result = await userService.updateUserPassword(id, currentPassword, newPassword);
   return res.status(result.status).json({ message: result.message });
 });
 
-router.post("/withdrawal", async (req, res) => {
+router.post('/withdrawal', async (req, res) => {
   const { id, password } = req.body;
 
   if (!id || !password) {
-    return res
-      .status(400)
-      .json({ message: "필수 정보가 제공되지 않았습니다." });
+    return res.status(400).json({ message: '필수 정보가 제공되지 않았습니다.' });
   }
 
   const result = await userService.deleteUser(id, password);
@@ -241,7 +232,7 @@ router.post("/withdrawal", async (req, res) => {
 });
 
 //전체 유저 정보 가져오기 - 류규환
-router.get("/userall", async (req, res) => {
+router.get('/userall', async (req, res) => {
   try {
     const users = await userService.getAllUsers();
     // 알려주셔서 감사합니다
@@ -252,10 +243,10 @@ router.get("/userall", async (req, res) => {
   }
 });
 
-router.post("/centerlist", async (req, res) => {
+router.post('/centerlist', async (req, res) => {
   const { user } = req.body;
   if (!user) {
-    return res.status(400).json("사용자 ID가 제공되지 않았습니다.");
+    return res.status(400).json('사용자 ID가 제공되지 않았습니다.');
   }
 
   try {
@@ -272,13 +263,11 @@ router.post("/centerlist", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get('/:id', async (req, res) => {
   const userId = req.params.id;
 
   if (!userId) {
-    return res
-      .status(400)
-      .json({ message: "사용자 ID가 제공되지 않았습니다." });
+    return res.status(400).json({ message: '사용자 ID가 제공되지 않았습니다.' });
   }
 
   try {
@@ -287,10 +276,8 @@ router.get("/:id", async (req, res) => {
       .status(result.status)
       .json(result.status === 200 ? result.user : { message: result.message });
   } catch (error) {
-    console.error("사용자 정보를 가져오는 중 오류 발생:", error);
-    res
-      .status(500)
-      .json({ message: "서버 오류가 발생했습니다. 다시 시도해 주세요." });
+    console.error('사용자 정보를 가져오는 중 오류 발생:', error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다. 다시 시도해 주세요.' });
   }
 });
 
