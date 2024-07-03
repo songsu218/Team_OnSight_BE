@@ -220,7 +220,7 @@ router.post("/pwUpdate", async (req, res) => {
   }
 
   const result = await userService.updateUserPassword(
-    user,
+    id,
     currentPassword,
     newPassword
   );

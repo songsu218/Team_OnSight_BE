@@ -56,7 +56,7 @@ const createRecord = async (req, res) => {
 
   const result = await postService.saveRecord(recordData);
 
-  res.status(200).json({ message: "success", thumbnail });
+  res.status(200).json({ message: "기록이 추가되었습니다", thumbnail });
   return res
     .status(result.status)
     .json({ message: result.message, record: result.record });

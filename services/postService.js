@@ -19,7 +19,7 @@ const saveRecord = async (recordData) => {
 
     return {
       status: 200,
-      message: "기록이 성공적으로 저장되었습니다.",
+      message: "기록이 저장되었습니다.",
       record,
     };
   } catch (error) {

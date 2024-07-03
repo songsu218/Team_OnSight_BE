@@ -22,7 +22,7 @@ async function register(id, nick, password) {
       password: hashedPassword,
     });
 
-    return { status: 201, message: "회원가입이 성공적으로 완료되었습니다." };
+    return { status: 201, message: "회원가입이 완료되었습니다." };
   } catch (err) {
     console.error("회원가입 중 오류 발생:", err);
     return {
@@ -195,7 +195,7 @@ async function updateUserPassword(id, currentPassword, newPassword) {
     }
 
     const updatedUser = await User.findOneAndUpdate(
-      { id: user.id },
+      { id: id },
       { password: await hashPassword(newPassword) },
       { new: true, runValidators: true }
     );
@@ -203,7 +203,7 @@ async function updateUserPassword(id, currentPassword, newPassword) {
     if (!updatedUser) {
       return { status: 500, message: "비밀번호 업데이트에 실패했습니다." };
     }
-    return { status: 200, message: "비밀번호가 성공적으로 변경되었습니다." };
+    return { status: 200, message: "비밀번호가 변경되었습니다." };
   } catch (err) {
     console.error("비밀번호 변경 중 오류 발생:", err);
     return {
@@ -227,7 +227,7 @@ async function deleteUser(id, password) {
     }
 
     await User.deleteOne({ id: user.id });
-    return { status: 200, message: "회원 탈퇴가 성공적으로 완료되었습니다." };
+    return { status: 200, message: "회원 탈퇴가 완료되었습니다." };
   } catch (err) {
     console.error("회원 탈퇴 중 오류 발생:", err);
     return {

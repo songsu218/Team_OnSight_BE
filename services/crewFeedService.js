@@ -17,7 +17,7 @@ const createCrewFeed = async (feedData) => {
 
     return {
       status: 201,
-      message: "피드가 성공적으로 생성되었습니다.",
+      message: "피드가 생성되었습니다.",
       newFeed,
     };
   } catch (err) {
@@ -79,7 +79,7 @@ const deleteCrewFeed = async (feedId, userId) => {
       return { status: 404, message: "사용자를 찾을 수 없습니다." };
     }
 
-    return { status: 200, message: "피드가 성공적으로 삭제되었습니다." };
+    return { status: 200, message: "피드가 삭제되었습니다." };
   } catch (error) {
     console.error("피드 삭제 중 오류 발생:", error);
     return {
