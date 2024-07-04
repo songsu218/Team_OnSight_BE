@@ -87,9 +87,23 @@ const joincrew = async (req, res) => {
   }
 };
 
+const leavecrew = async (req, res) => {
+  const { userId, crewId } = req.body;
+  try {
+    const updateCrew = await crewService.leavecrew(userId, crewId);
+    const updateUser = await userService.crewsleave(userId, crewId);
+    const users = await userService.getAllUsers();
+    const crews = await crewService.getAllCrews();
+    res.json({ updateUser, updateCrew, users, crews });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 router.get("/", getCrews);
 router.post("/", upload.single("crewImg"), createCrew);
 router.put("/:id", upload.single("crewImg"), updateCrew);
 router.post("/crewjoin", joincrew);
+router.post("/crewleave", leavecrew);
 
 module.exports = router;

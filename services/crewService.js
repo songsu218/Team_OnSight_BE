@@ -89,10 +89,27 @@ async function joincrew(userInfo, crewInfo) {
   }
 }
 
+async function leavecrew(userInfo, crewInfo) {
+  try {
+    const crew = await Crew.findOneAndUpdate(
+      { _id: crewInfo._id },
+      { $pull: { members: userInfo.id }, $inc: { membercount: -1 } },
+      { new: true, runValidators: true }
+    );
+    if (!crew) {
+      throw new Error("크루 탈퇴 : 크루 정보를 업데이트 할 수 없습니다.");
+    }
+    return crew;
+  } catch (err) {
+    throw new Error("크루 정보를 업데이트 할 수 없습니다.");
+  }
+}
+
 module.exports = {
   userFeedList,
   createCrew,
   getAllCrews,
   updateCrew,
   joincrew,
+  leavecrew,
 };
