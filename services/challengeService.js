@@ -14,6 +14,13 @@ async function register(ChallengeData) {
   edate.setDate(sdate.getDate() + 7);
   edate.setHours(23, 59, 59, 999); // 종료일을 그날 밤 23:59:59로 설정
 
+  const ChallengeMyDoc = await Challenge.find({
+    'date.1': { $gte: new Date() },
+    id: ChallengeData.id,
+  });
+  if (ChallengeMyDoc.length > 0) {
+    throw new Error('이미 7일내 생성한 챌린지가 있습니다.');
+  }
   const climbingCenters = await climbingCenter.findOne(
     {
       center: ChallengeData.center,
@@ -273,7 +280,10 @@ async function userChallengeList(userData) {
     if (!chalList) {
       return { message: 'no Challenges List' };
     }
-
+    for (let index = 0; index < chalList.length; index++) {
+      const date = chalList[index].date.slice();
+      chalList[index].state = retState(date);
+    }
     return chalList;
   } catch (err) {
     return { message: 'Challenges find mongoDB error' };
