@@ -19,7 +19,7 @@ async function register(ChallengeData) {
     id: ChallengeData.id,
   });
   if (ChallengeMyDoc.length > 0) {
-    throw new Error('이미 7일내 생성한 챌린지가 있습니다.');
+    throw new Error('이미 7일 내 생성한 챌린지가 있습니다.');
   }
   const climbingCenters = await climbingCenter.findOne(
     {
